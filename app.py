@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory
 import os
 import asyncio
 import edge_tts
+import random
 
 app = Flask(__name__)
 PORT = int(os.environ.get("PORT", 10000))
@@ -21,7 +22,6 @@ def preview():
     data = request.json
     voice = data.get('voice', 'ur-PK-UzmaNeural')
 
-    # Default Preview Text according to Language/Country
     if voice.startswith("ur-PK") or voice.startswith("ur-IN"):
         preview_text = "فاطمہ ٹی ٹی ایس اسٹوڈیو میں آپ کا خوش آمدید ہے۔"
     elif voice.startswith("hi-IN"):
@@ -47,14 +47,11 @@ def preview():
         except: pass
 
     try:
-        # Try running generation with a short timeout/retry
         asyncio.run(generate_voice_async(preview_text, voice, output_path))
-        
-        # Check if file was actually written and has size
         if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
             return jsonify({"success": True, "audio_url": f"/download/{output_file}?v={os.urandom(4).hex()}"})
         else:
-            return jsonify({"success": False, "error": "Zero-byte file generated. Server connection timed out. Please try again."})
+            return jsonify({"success": False, "error": "Zero-byte file generated."})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
@@ -67,19 +64,21 @@ def generate():
     if not text.strip():
         return jsonify({"success": False, "error": "Script is empty!"})
 
-    output_file = "output.mp3"
+    # Lakhon carororen mein se random number generate karne ke liye range barha di hai
+    random_num = random.randint(100000000000000000, 999999999999999999)
+    output_file = f"FatimaTTS-{random_num}.mp3"
     output_path = os.path.join(BASE_DIR, output_file)
-
-    if os.path.exists(output_path):
-        try: os.remove(output_path)
-        except: pass
 
     try:
         asyncio.run(generate_voice_async(text, voice, output_path))
         if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
-            return jsonify({"success": True, "audio_url": f"/download/{output_file}?v={os.urandom(4).hex()}"})
+            return jsonify({
+                "success": True, 
+                "audio_url": f"/download/{output_file}?v={os.urandom(4).hex()}",
+                "filename": output_file
+            })
         else:
-            return jsonify({"success": False, "error": "Server failed to process TTS. Please try again."})
+            return jsonify({"success": False, "error": "Server failed to process TTS."})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
