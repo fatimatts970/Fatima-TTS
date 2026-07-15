@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fatima TTS - Premium Voice Studio</title>
-    <!-- Tailwind CSS & Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- Fixed FontAwesome CDN Link below for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -56,11 +54,9 @@
 <body class="text-gray-100 flex items-center justify-center p-4 md:p-8">
 
     <div class="w-full max-w-lg glass-card p-6 md:p-8 relative overflow-hidden">
-        <!-- Background Glows -->
         <div class="absolute -top-24 -left-24 w-48 h-48 bg-purple-600 rounded-full blur-[80px] opacity-30"></div>
         <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-600 rounded-full blur-[80px] opacity-30"></div>
 
-        <!-- Logo & Header -->
         <div class="text-center mb-6 relative z-10">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-blue-500 shadow-lg shadow-purple-500/30 mb-3">
                 <span class="text-3xl font-extrabold text-white tracking-wider">F</span>
@@ -69,13 +65,11 @@
             <p class="text-xs uppercase tracking-widest text-gray-400 font-semibold mt-1">Premium Voice Studio</p>
         </div>
 
-        <!-- Text Area -->
         <div class="mb-6 relative z-10">
             <textarea id="scriptText" placeholder="Apni script yahan likhein..." 
                 class="w-full h-32 px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-purple-500 text-gray-100 placeholder-gray-500 resize-none transition duration-300 text-right" dir="auto"></textarea>
         </div>
 
-        <!-- Tabs -->
         <div class="flex space-x-2 bg-white/5 p-1 rounded-xl mb-4 relative z-10">
             <button id="allVoicesTab" class="flex-1 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow">
                 <i class="fa-solid fa-microphone-lines mr-1.5"></i> All Voices
@@ -85,18 +79,14 @@
             </button>
         </div>
 
-        <!-- Voices List Container -->
         <div class="h-64 overflow-y-auto space-y-2 mb-6 pr-1 relative z-10" id="voicesContainer">
-            <!-- Voice Cards dynamically injected here -->
-        </div>
+            </div>
 
-        <!-- Action Button -->
         <button id="generateBtn" class="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-purple-600/20 transition duration-300 flex items-center justify-center space-x-2 relative z-10">
             <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
             <span>Generate Voice</span>
         </button>
 
-        <!-- Audio Player Box (Hidden initially) -->
         <div id="audioPlayerContainer" class="mt-6 p-4 bg-white/5 rounded-xl border border-white/10 hidden relative z-10">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs text-gray-400 font-medium">Generated Audio:</span>
@@ -106,23 +96,31 @@
         </div>
     </div>
 
-    <!-- Script Section -->
+    <audio id="silentPreviewPlayer" style="display: none;"></audio>
+
     <script>
+        // Extended Unlimited Voice List (Premium Urdu & Hindi Voices)
         const voices = [
-            { id: "ur-PK-UzmaNeural", name: "Urdu (Pakistan) - Uzma [Female]", lang: "ur" },
-            { id: "ur-PK-AsadNeural", name: "Urdu (Pakistan) - Asad [Male]", lang: "ur" },
-            { id: "ur-IN-GulNeural", name: "Urdu (India) - Gul [Female]", lang: "ur" },
-            { id: "hi-IN-SwaraNeural", name: "Hindi (India) - Swara [Female]", lang: "hi" }
+            { id: "ur-PK-UzmaNeural", name: "Urdu (PK) - Uzma [Female - Premium]", lang: "ur" },
+            { id: "ur-PK-AsadNeural", name: "Urdu (PK) - Asad [Male - Premium]", lang: "ur" },
+            { id: "ur-IN-GulNeural", name: "Urdu (IN) - Gul [Female]", lang: "ur" },
+            { id: "ur-IN-SalmanNeural", name: "Urdu (IN) - Salman [Male]", lang: "ur" },
+            { id: "hi-IN-SwaraNeural", name: "Hindi (IN) - Swara [Female - Soft]", lang: "hi" },
+            { id: "hi-IN-MadhurNeural", name: "Hindi (IN) - Madhur [Male - Bold]", lang: "hi" },
+            { id: "hi-IN-DivyaNeural", name: "Hindi (IN) - Divya [Female]", lang: "hi" },
+            { id: "hi-IN-KaranNeural", name: "Hindi (IN) - Karan [Male]", lang: "hi" }
         ];
 
         let selectedVoice = "ur-PK-UzmaNeural";
         let favorites = JSON.parse(localStorage.getItem('tts_favorites')) || [];
+        let currentlyPlayingVoiceId = null;
 
         const voicesContainer = document.getElementById('voicesContainer');
         const generateBtn = document.getElementById('generateBtn');
         const scriptText = document.getElementById('scriptText');
         const audioPlayerContainer = document.getElementById('audioPlayerContainer');
         const audioPlayer = document.getElementById('audioPlayer');
+        const silentPreviewPlayer = document.getElementById('silentPreviewPlayer');
 
         // Render Voice Cards
         function renderVoices(filterFavorites = false) {
@@ -137,6 +135,7 @@
             listToRender.forEach(voice => {
                 const isSelected = voice.id === selectedVoice;
                 const isFav = favorites.includes(voice.id);
+                const isPlayingThis = voice.id === currentlyPlayingVoiceId;
 
                 const card = document.createElement('div');
                 card.className = `voice-card p-3 rounded-xl flex items-center justify-between cursor-pointer ${isSelected ? 'selected' : 'bg-white/5'}`;
@@ -145,15 +144,15 @@
                 card.innerHTML = `
                     <div class="flex items-center space-x-3">
                         <div class="w-8 h-8 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-                            <i class="fa-solid ${voice.id.includes('Male') ? 'fa-user-tie' : 'fa-user'}"></i>
+                            <i class="fa-solid ${voice.id.includes('Male') || voice.id.includes('Salman') || voice.id.includes('Madhur') || voice.id.includes('Karan') ? 'fa-user-tie' : 'fa-user'}"></i>
                         </div>
                         <div>
                             <p class="text-sm font-medium text-white">${voice.name}</p>
                         </div>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <button onclick="event.stopPropagation(); testVoice('${voice.id}')" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-purple-600/30 text-gray-400 hover:text-white flex items-center justify-center transition">
-                            <i class="fa-solid fa-play text-xs"></i>
+                        <button id="playBtn-${voice.id}" onclick="event.stopPropagation(); testVoice('${voice.id}')" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-purple-600/30 text-gray-400 hover:text-white flex items-center justify-center transition">
+                            <i class="fa-solid ${isPlayingThis ? 'fa-pause text-purple-400' : 'fa-play text-xs'}"></i>
                         </button>
                         <button onclick="event.stopPropagation(); toggleFavorite('${voice.id}')" class="w-7 h-7 rounded-lg bg-white/5 text-gray-400 hover:text-yellow-500 flex items-center justify-center transition">
                             <i class="fa-${isFav ? 'solid' : 'regular'} fa-star ${isFav ? 'text-yellow-500' : ''} text-xs"></i>
@@ -181,26 +180,76 @@
             renderVoices(currentTab);
         }
 
-        // Preview sound test
+        // Preview sound test (Keeps audio player box hidden and handles Play/Pause icons)
         async function testVoice(voiceId) {
+            const playIconBtn = document.querySelector(`#playBtn-${voiceId} i`);
+
+            // If already playing, pause it
+            if (currentlyPlayingVoiceId === voiceId) {
+                silentPreviewPlayer.pause();
+                currentlyPlayingVoiceId = null;
+                if (playIconBtn) {
+                    playIconBtn.className = 'fa-solid fa-play text-xs';
+                }
+                return;
+            }
+
+            // Reset any previous play buttons across all cards
+            if (currentlyPlayingVoiceId) {
+                const prevPlayIconBtn = document.querySelector(`#playBtn-${currentlyPlayingVoiceId} i`);
+                if (prevPlayIconBtn) prevPlayIconBtn.className = 'fa-solid fa-play text-xs';
+            }
+
             try {
+                if (playIconBtn) {
+                    playIconBtn.className = 'fa-solid fa-spinner animate-spin text-xs';
+                }
+
                 const response = await fetch('/preview', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ voice: voiceId })
                 });
                 const data = await response.json();
+                
                 if (data.success) {
-                    audioPlayer.src = data.audio_url;
-                    audioPlayerContainer.classList.remove('hidden');
-                    audioPlayer.play();
+                    currentlyPlayingVoiceId = voiceId;
+                    silentPreviewPlayer.src = data.audio_url;
+                    
+                    if (playIconBtn) {
+                        playIconBtn.className = 'fa-solid fa-pause text-purple-400';
+                    }
+                    silentPreviewPlayer.play();
                 } else {
                     alert("Preview failed: " + data.error);
+                    if (playIconBtn) playIconBtn.className = 'fa-solid fa-play text-xs';
                 }
             } catch (err) {
                 alert("Server Connection Error!");
+                if (playIconBtn) playIconBtn.className = 'fa-solid fa-play text-xs';
             }
         }
+
+        // Silent player state change listeners
+        silentPreviewPlayer.onended = function() {
+            if (currentlyPlayingVoiceId) {
+                const playIconBtn = document.querySelector(`#playBtn-${currentlyPlayingVoiceId} i`);
+                if (playIconBtn) {
+                    playIconBtn.className = 'fa-solid fa-play text-xs';
+                }
+                currentlyPlayingVoiceId = null;
+            }
+        };
+
+        silentPreviewPlayer.onpause = function() {
+            if (currentlyPlayingVoiceId) {
+                const playIconBtn = document.querySelector(`#playBtn-${currentlyPlayingVoiceId} i`);
+                if (playIconBtn) {
+                    playIconBtn.className = 'fa-solid fa-play text-xs';
+                }
+                currentlyPlayingVoiceId = null;
+            }
+        };
 
         // Tabs Toggle
         document.getElementById('allVoicesTab').onclick = function() {
@@ -215,7 +264,7 @@
             renderVoices(true);
         };
 
-        // Main voice generator
+        // Main voice generator (Only this shows the bottom audio player box)
         generateBtn.onclick = async function() {
             const text = scriptText.value.trim();
             if (!text) {
@@ -227,6 +276,11 @@
             generateBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-2"></i> Generating...`;
 
             try {
+                // Pause any preview currently running
+                if (currentlyPlayingVoiceId) {
+                    silentPreviewPlayer.pause();
+                }
+
                 const response = await fetch('/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
