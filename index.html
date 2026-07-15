@@ -85,6 +85,12 @@
             </button>
         </div>
 
+        <!-- Search Bar -->
+        <div class="mb-4 relative z-10">
+            <input type="text" id="searchVoices" placeholder="Search language or voice..." 
+                class="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-purple-500 text-sm text-gray-200 placeholder-gray-500 transition duration-300">
+        </div>
+
         <!-- Voices List Container -->
         <div class="h-64 overflow-y-auto space-y-2 mb-6 pr-1 relative z-10" id="voicesContainer">
             <!-- Voice Cards dynamically injected here -->
@@ -96,7 +102,7 @@
             <span>Generate Voice</span>
         </button>
 
-        <!-- Audio Player Box (Only shows generated files) -->
+        <!-- Audio Player Box -->
         <div id="audioPlayerContainer" class="mt-6 p-4 bg-white/5 rounded-xl border border-white/10 hidden relative z-10">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs text-gray-400 font-medium">Generated Audio:</span>
@@ -111,7 +117,7 @@
 
     <!-- Script Section -->
     <script>
-        // Full Global Voice List (Urdu, Hindi, English, Spanish, Arabic, Afrikaans, Hebrew)
+        // Full Global Voice List with No Broken Hindi Voices & Max Premium English Voices
         const voices = [
             // Urdu (Pakistan & India)
             { id: "ur-PK-UzmaNeural", name: "Urdu (PK) - Uzma [Female]", lang: "ur" },
@@ -119,26 +125,56 @@
             { id: "ur-IN-GulNeural", name: "Urdu (IN) - Gul [Female]", lang: "ur" },
             { id: "ur-IN-SalmanNeural", name: "Urdu (IN) - Salman [Male]", lang: "ur" },
             
-            // Hindi (India)
+            // Hindi (India) - Divya and Karan Removed!
             { id: "hi-IN-SwaraNeural", name: "Hindi (IN) - Swara [Female]", lang: "hi" },
             { id: "hi-IN-MadhurNeural", name: "Hindi (IN) - Madhur [Male]", lang: "hi" },
-            { id: "hi-IN-DivyaNeural", name: "Hindi (IN) - Divya [Female]", lang: "hi" },
-            { id: "hi-IN-KaranNeural", name: "Hindi (IN) - Karan [Male]", lang: "hi" },
 
-            // English (US & UK)
+            // English (US) - MAX Premium Voices (Including Steffan!)
+            { id: "en-US-SteffanNeural", name: "English (US) - Steffan [Male - Premium]", lang: "en" },
             { id: "en-US-AriaNeural", name: "English (US) - Aria [Female]", lang: "en" },
             { id: "en-US-GuyNeural", name: "English (US) - Guy [Male]", lang: "en" },
+            { id: "en-US-EmmaNeural", name: "English (US) - Emma [Female - Soft]", lang: "en" },
+            { id: "en-US-AndrewNeural", name: "English (US) - Andrew [Male]", lang: "en" },
+            { id: "en-US-AvaNeural", name: "English (US) - Ava [Female]", lang: "en" },
+            { id: "en-US-BrianNeural", name: "English (US) - Brian [Male]", lang: "en" },
+
+            // English (UK / Australia / India)
             { id: "en-GB-SoniaNeural", name: "English (UK) - Sonia [Female]", lang: "en" },
             { id: "en-GB-RyanNeural", name: "English (UK) - Ryan [Male]", lang: "en" },
+            { id: "en-GB-LibbyNeural", name: "English (UK) - Libby [Female]", lang: "en" },
+            { id: "en-AU-NatashaNeural", name: "English (AUS) - Natasha [Female]", lang: "en" },
+            { id: "en-AU-WilliamNeural", name: "English (AUS) - William [Male]", lang: "en" },
+            { id: "en-IN-NeerjaNeural", name: "English (IND) - Neerja [Female]", lang: "en" },
+            { id: "en-IN-PrabhatNeural", name: "English (IND) - Prabhat [Male]", lang: "en" },
 
-            // Arabic (Saudi Arabia & UAE)
+            // Arabic (Saudi Arabia, Egypt, UAE)
             { id: "ar-SA-ZariyahNeural", name: "Arabic (SA) - Zariyah [Female]", lang: "ar" },
             { id: "ar-SA-HamedNeural", name: "Arabic (SA) - Hamed [Male]", lang: "ar" },
+            { id: "ar-EG-SalmaNeural", name: "Arabic (EG) - Salma [Female]", lang: "ar" },
             { id: "ar-AE-FatimaNeural", name: "Arabic (UAE) - Fatima [Female]", lang: "ar" },
+            { id: "ar-AE-HamdanNeural", name: "Arabic (UAE) - Hamdan [Male]", lang: "ar" },
 
             // Spanish (Spain & Mexico)
             { id: "es-ES-ElviraNeural", name: "Spanish (ES) - Elvira [Female]", lang: "es" },
+            { id: "es-ES-AlvaroNeural", name: "Spanish (ES) - Alvaro [Male]", lang: "es" },
+            { id: "es-MX-DaliaNeural", name: "Spanish (MX) - Dalia [Female]", lang: "es" },
             { id: "es-MX-JorgeNeural", name: "Spanish (MX) - Jorge [Male]", lang: "es" },
+
+            // French (France)
+            { id: "fr-FR-DeniseNeural", name: "French (FR) - Denise [Female]", lang: "fr" },
+            { id: "fr-FR-HenriNeural", name: "French (FR) - Henri [Male]", lang: "fr" },
+
+            // German (Germany)
+            { id: "de-DE-KatjaNeural", name: "German (DE) - Katja [Female]", lang: "de" },
+            { id: "de-DE-ConradNeural", name: "German (DE) - Conrad [Male]", lang: "de" },
+
+            // Turkish (Turkey)
+            { id: "tr-TR-EmelNeural", name: "Turkish (TR) - Emel [Female]", lang: "tr" },
+            { id: "tr-TR-AhmetNeural", name: "Turkish (TR) - Ahmet [Male]", lang: "tr" },
+
+            // Persian / Farsi (Iran)
+            { id: "fa-IR-DilaraNeural", name: "Persian (IR) - Dilara [Female]", lang: "fa" },
+            { id: "fa-IR-FaridNeural", name: "Persian (IR) - Farid [Male]", lang: "fa" },
 
             // Afrikaans (South Africa)
             { id: "af-ZA-AdriNeural", name: "Afrikaans (ZA) - Adri [Female]", lang: "af" },
@@ -156,17 +192,25 @@
         const voicesContainer = document.getElementById('voicesContainer');
         const generateBtn = document.getElementById('generateBtn');
         const scriptText = document.getElementById('scriptText');
+        const searchInput = document.getElementById('searchVoices');
         const audioPlayerContainer = document.getElementById('audioPlayerContainer');
         const audioPlayer = document.getElementById('audioPlayer');
         const silentPreviewPlayer = document.getElementById('silentPreviewPlayer');
 
         // Render Voice Cards
-        function renderVoices(filterFavorites = false) {
+        function renderVoices(filterFavorites = false, query = "") {
             voicesContainer.innerHTML = '';
-            const listToRender = filterFavorites ? voices.filter(v => favorites.includes(v.id)) : voices;
+            let listToRender = filterFavorites ? voices.filter(v => favorites.includes(v.id)) : voices;
+
+            if (query.trim() !== "") {
+                listToRender = listToRender.filter(v => 
+                    v.name.toLowerCase().includes(query.toLowerCase()) || 
+                    v.id.toLowerCase().includes(query.toLowerCase())
+                );
+            }
 
             if (listToRender.length === 0) {
-                voicesContainer.innerHTML = `<div class="text-center text-gray-500 py-10 text-sm">No favorite voices yet.</div>`;
+                voicesContainer.innerHTML = `<div class="text-center text-gray-500 py-10 text-sm">No voices found.</div>`;
                 return;
             }
 
@@ -180,7 +224,7 @@
                 card.onclick = () => selectVoice(voice.id);
 
                 // Gender-specific Icon logic
-                const isMale = voice.id.includes('Male') || voice.id.includes('Salman') || voice.id.includes('Madhur') || voice.id.includes('Karan') || voice.id.includes('Guy') || voice.id.includes('Ryan') || voice.id.includes('Hamed') || voice.id.includes('Jorge') || voice.id.includes('Willem') || voice.id.includes('Avri');
+                const isMale = voice.id.includes('Male') || voice.id.includes('Salman') || voice.id.includes('Madhur') || voice.id.includes('Karan') || voice.id.includes('Guy') || voice.id.includes('Ryan') || voice.id.includes('Hamed') || voice.id.includes('Jorge') || voice.id.includes('Willem') || voice.id.includes('Avri') || voice.id.includes('Steffan') || voice.id.includes('Andrew') || voice.id.includes('Brian') || voice.id.includes('William') || voice.id.includes('Prabhat') || voice.id.includes('Hamdan') || voice.id.includes('Alvaro') || voice.id.includes('Henri') || voice.id.includes('Conrad') || voice.id.includes('Ahmet') || voice.id.includes('Farid');
 
                 card.innerHTML = `
                     <div class="flex items-center space-x-3">
@@ -207,7 +251,7 @@
         function selectVoice(id) {
             selectedVoice = id;
             const currentTab = document.getElementById('favoritesTab').classList.contains('text-white');
-            renderVoices(currentTab);
+            renderVoices(currentTab, searchInput.value);
         }
 
         function toggleFavorite(id) {
@@ -218,8 +262,14 @@
             }
             localStorage.setItem('tts_favorites', JSON.stringify(favorites));
             const currentTab = document.getElementById('favoritesTab').classList.contains('text-white');
-            renderVoices(currentTab);
+            renderVoices(currentTab, searchInput.value);
         }
+
+        // Search event listener
+        searchInput.oninput = function() {
+            const currentTab = document.getElementById('favoritesTab').classList.contains('text-white');
+            renderVoices(currentTab, this.value);
+        };
 
         // Preview sound test (Handles Play/Pause icons instantly)
         async function testVoice(voiceId) {
@@ -264,7 +314,7 @@
                     if (playIconBtn) playIconBtn.className = 'fa-solid fa-play text-xs';
                 }
             } catch (err) {
-                alert("Connection error! Vercel took too long to generate. Please try clicking the play button again.");
+                alert("Connection error! Please try clicking the play button again.");
                 if (playIconBtn) playIconBtn.className = 'fa-solid fa-play text-xs';
             }
         }
@@ -292,13 +342,13 @@
         document.getElementById('allVoicesTab').onclick = function() {
             this.className = "flex-1 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow";
             document.getElementById('favoritesTab').className = "flex-1 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white transition";
-            renderVoices(false);
+            renderVoices(false, searchInput.value);
         };
 
         document.getElementById('favoritesTab').onclick = function() {
             this.className = "flex-1 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow";
             document.getElementById('allVoicesTab').className = "flex-1 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white transition";
-            renderVoices(true);
+            renderVoices(true, searchInput.value);
         };
 
         generateBtn.onclick = async function() {
