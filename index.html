@@ -37,6 +37,30 @@
             border-color: #a855f7;
             box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
         }
+        /* Custom Seek Slider Range Styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 6px;
+            outline: none;
+            transition: background 0.3s;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #a855f7;
+            cursor: pointer;
+            box-shadow: 0 0 8px #a855f7;
+            transition: transform 0.1s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+        }
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -67,6 +91,11 @@
             </div>
             <h1 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">Fatima TTS</h1>
             <p class="text-xs uppercase tracking-widest text-gray-400 font-semibold mt-1">Premium Voice Studio</p>
+            
+            <!-- Yellow Color Counter Line -->
+            <p class="text-sm text-yellow-400 font-medium tracking-wide mt-3">
+                <i class="fa-solid fa-bolt mr-1 animate-pulse"></i> Total 35 Premium Global Voices Active Hain!
+            </p>
         </div>
 
         <!-- Text Area -->
@@ -96,28 +125,44 @@
             <!-- Voice Cards dynamically injected here -->
         </div>
 
-        <!-- Action Button -->
-        <button id="generateBtn" class="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-purple-600/20 transition duration-300 flex items-center justify-center space-x-2 relative z-10">
-            <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
-            <span>Generate Voice</span>
-        </button>
+        <!-- Action Button Panel (Generate & Stop) -->
+        <div class="flex space-x-3 mb-6 relative z-10">
+            <button id="generateBtn" class="flex-2 w-3/4 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-purple-600/20 transition duration-300 flex items-center justify-center">
+                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
+                <span>Generate Voice</span>
+            </button>
+            <button id="stopBtn" class="flex-1 w-1/4 py-4 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 text-red-400 font-semibold rounded-xl transition duration-300 flex items-center justify-center">
+                <i class="fa-solid fa-circle-stop mr-2"></i> Stop
+            </button>
+        </div>
 
-        <!-- Audio Player Box -->
-        <div id="audioPlayerContainer" class="mt-6 p-4 bg-white/5 rounded-xl border border-white/10 hidden relative z-10">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-xs text-gray-400 font-medium">Generated Audio:</span>
-                <button onclick="closeAudioPlayer()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        <!-- Custom Luxury Audio Player Box -->
+        <div id="audioPlayerContainer" class="p-4 bg-gradient-to-r from-purple-950/40 to-indigo-950/40 rounded-2xl border border-white/10 hidden relative z-10 shadow-inner">
+            <div class="flex items-center space-x-4">
+                <!-- Play/Pause Button -->
+                <button id="customPlayPauseBtn" class="w-12 h-12 rounded-xl bg-purple-600 hover:bg-purple-500 flex items-center justify-center text-white shadow-md transition duration-200">
+                    <i class="fa-solid fa-play text-lg"></i>
+                </button>
+                
+                <!-- Progress & Details -->
+                <div class="flex-1 flex flex-col justify-center">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs text-gray-400 font-semibold tracking-wider uppercase">Voice Output</span>
+                        <span id="playerTime" class="text-xs text-gray-400 font-medium">0:00 / 0:00</span>
+                    </div>
+                    <!-- Stylish Seeker Bar (—•—) -->
+                    <input type="range" id="playerSeeker" value="0" min="0" max="100" class="w-full">
+                </div>
             </div>
-            <audio id="audioPlayer" controls class="w-full"></audio>
         </div>
     </div>
 
-    <!-- Hidden Background Audio Player for Silent Previews -->
+    <!-- Hidden Background Audio Players -->
+    <audio id="audioPlayer" style="display: none;"></audio>
     <audio id="silentPreviewPlayer" style="display: none;"></audio>
 
     <!-- Script Section -->
     <script>
-        // Full Global Voice List with No Broken Hindi Voices & Max Premium English Voices
         const voices = [
             // Urdu (Pakistan & India)
             { id: "ur-PK-UzmaNeural", name: "Urdu (PK) - Uzma [Female]", lang: "ur" },
@@ -125,11 +170,11 @@
             { id: "ur-IN-GulNeural", name: "Urdu (IN) - Gul [Female]", lang: "ur" },
             { id: "ur-IN-SalmanNeural", name: "Urdu (IN) - Salman [Male]", lang: "ur" },
             
-            // Hindi (India) - Divya and Karan Removed!
+            // Hindi (India)
             { id: "hi-IN-SwaraNeural", name: "Hindi (IN) - Swara [Female]", lang: "hi" },
             { id: "hi-IN-MadhurNeural", name: "Hindi (IN) - Madhur [Male]", lang: "hi" },
 
-            // English (US) - MAX Premium Voices (Including Steffan!)
+            // English (US)
             { id: "en-US-SteffanNeural", name: "English (US) - Steffan [Male - Premium]", lang: "en" },
             { id: "en-US-AriaNeural", name: "English (US) - Aria [Female]", lang: "en" },
             { id: "en-US-GuyNeural", name: "English (US) - Guy [Male]", lang: "en" },
@@ -147,40 +192,40 @@
             { id: "en-IN-NeerjaNeural", name: "English (IND) - Neerja [Female]", lang: "en" },
             { id: "en-IN-PrabhatNeural", name: "English (IND) - Prabhat [Male]", lang: "en" },
 
-            // Arabic (Saudi Arabia, Egypt, UAE)
+            // Arabic
             { id: "ar-SA-ZariyahNeural", name: "Arabic (SA) - Zariyah [Female]", lang: "ar" },
             { id: "ar-SA-HamedNeural", name: "Arabic (SA) - Hamed [Male]", lang: "ar" },
             { id: "ar-EG-SalmaNeural", name: "Arabic (EG) - Salma [Female]", lang: "ar" },
             { id: "ar-AE-FatimaNeural", name: "Arabic (UAE) - Fatima [Female]", lang: "ar" },
             { id: "ar-AE-HamdanNeural", name: "Arabic (UAE) - Hamdan [Male]", lang: "ar" },
 
-            // Spanish (Spain & Mexico)
+            // Spanish
             { id: "es-ES-ElviraNeural", name: "Spanish (ES) - Elvira [Female]", lang: "es" },
             { id: "es-ES-AlvaroNeural", name: "Spanish (ES) - Alvaro [Male]", lang: "es" },
             { id: "es-MX-DaliaNeural", name: "Spanish (MX) - Dalia [Female]", lang: "es" },
             { id: "es-MX-JorgeNeural", name: "Spanish (MX) - Jorge [Male]", lang: "es" },
 
-            // French (France)
+            // French
             { id: "fr-FR-DeniseNeural", name: "French (FR) - Denise [Female]", lang: "fr" },
             { id: "fr-FR-HenriNeural", name: "French (FR) - Henri [Male]", lang: "fr" },
 
-            // German (Germany)
+            // German
             { id: "de-DE-KatjaNeural", name: "German (DE) - Katja [Female]", lang: "de" },
             { id: "de-DE-ConradNeural", name: "German (DE) - Conrad [Male]", lang: "de" },
 
-            // Turkish (Turkey)
+            // Turkish
             { id: "tr-TR-EmelNeural", name: "Turkish (TR) - Emel [Female]", lang: "tr" },
             { id: "tr-TR-AhmetNeural", name: "Turkish (TR) - Ahmet [Male]", lang: "tr" },
 
-            // Persian / Farsi (Iran)
+            // Persian
             { id: "fa-IR-DilaraNeural", name: "Persian (IR) - Dilara [Female]", lang: "fa" },
             { id: "fa-IR-FaridNeural", name: "Persian (IR) - Farid [Male]", lang: "fa" },
 
-            // Afrikaans (South Africa)
+            // Afrikaans
             { id: "af-ZA-AdriNeural", name: "Afrikaans (ZA) - Adri [Female]", lang: "af" },
             { id: "af-ZA-WillemNeural", name: "Afrikaans (ZA) - Willem [Male]", lang: "af" },
 
-            // Hebrew (Israel)
+            // Hebrew
             { id: "he-IL-HilaNeural", name: "Hebrew (IL) - Hila [Female]", lang: "he" },
             { id: "he-IL-AvriNeural", name: "Hebrew (IL) - Avri [Male]", lang: "he" }
         ];
@@ -191,11 +236,17 @@
 
         const voicesContainer = document.getElementById('voicesContainer');
         const generateBtn = document.getElementById('generateBtn');
+        const stopBtn = document.getElementById('stopBtn');
         const scriptText = document.getElementById('scriptText');
         const searchInput = document.getElementById('searchVoices');
         const audioPlayerContainer = document.getElementById('audioPlayerContainer');
         const audioPlayer = document.getElementById('audioPlayer');
         const silentPreviewPlayer = document.getElementById('silentPreviewPlayer');
+        
+        // Custom Player Elements
+        const customPlayPauseBtn = document.getElementById('customPlayPauseBtn');
+        const playerSeeker = document.getElementById('playerSeeker');
+        const playerTime = document.getElementById('playerTime');
 
         // Render Voice Cards
         function renderVoices(filterFavorites = false, query = "") {
@@ -223,7 +274,6 @@
                 card.className = `voice-card p-3 rounded-xl flex items-center justify-between cursor-pointer ${isSelected ? 'selected' : 'bg-white/5'}`;
                 card.onclick = () => selectVoice(voice.id);
 
-                // Gender-specific Icon logic
                 const isMale = voice.id.includes('Male') || voice.id.includes('Salman') || voice.id.includes('Madhur') || voice.id.includes('Karan') || voice.id.includes('Guy') || voice.id.includes('Ryan') || voice.id.includes('Hamed') || voice.id.includes('Jorge') || voice.id.includes('Willem') || voice.id.includes('Avri') || voice.id.includes('Steffan') || voice.id.includes('Andrew') || voice.id.includes('Brian') || voice.id.includes('William') || voice.id.includes('Prabhat') || voice.id.includes('Hamdan') || voice.id.includes('Alvaro') || voice.id.includes('Henri') || voice.id.includes('Conrad') || voice.id.includes('Ahmet') || voice.id.includes('Farid');
 
                 card.innerHTML = `
@@ -265,13 +315,12 @@
             renderVoices(currentTab, searchInput.value);
         }
 
-        // Search event listener
         searchInput.oninput = function() {
             const currentTab = document.getElementById('favoritesTab').classList.contains('text-white');
             renderVoices(currentTab, this.value);
         };
 
-        // Preview sound test (Handles Play/Pause icons instantly)
+        // Preview sound test
         async function testVoice(voiceId) {
             const playIconBtn = document.querySelector(`#playBtn-${voiceId} i`);
 
@@ -314,11 +363,12 @@
                     if (playIconBtn) playIconBtn.className = 'fa-solid fa-play text-xs';
                 }
             } catch (err) {
-                alert("Connection error! Please try clicking the play button again.");
+                alert("Connection error! Please try again.");
                 if (playIconBtn) playIconBtn.className = 'fa-solid fa-play text-xs';
             }
         }
 
+        // Silent player listeners
         silentPreviewPlayer.onended = function() {
             if (currentlyPlayingVoiceId) {
                 const playIconBtn = document.querySelector(`#playBtn-${currentlyPlayingVoiceId} i`);
@@ -339,6 +389,7 @@
             }
         };
 
+        // Tabs Toggle
         document.getElementById('allVoicesTab').onclick = function() {
             this.className = "flex-1 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow";
             document.getElementById('favoritesTab').className = "flex-1 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white transition";
@@ -351,6 +402,7 @@
             renderVoices(true, searchInput.value);
         };
 
+        // Main Voice Generation Action
         generateBtn.onclick = async function() {
             const text = scriptText.value.trim();
             if (!text) {
@@ -387,10 +439,76 @@
             }
         };
 
-        function closeAudioPlayer() {
-            audioPlayerContainer.classList.add('hidden');
+        // STOP Generation & Speech Button Logic
+        stopBtn.onclick = async function() {
+            // Stop background TTS audio generation endpoint request
+            try {
+                await fetch('/stop', { method: 'POST' });
+            } catch (e) {}
+
+            // Immediately pause and clear the players
             audioPlayer.pause();
-            audioPlayer.src = '';
+            audioPlayer.currentTime = 0;
+            silentPreviewPlayer.pause();
+            silentPreviewPlayer.currentTime = 0;
+
+            if (currentlyPlayingVoiceId) {
+                const playIconBtn = document.querySelector(`#playBtn-${currentlyPlayingVoiceId} i`);
+                if (playIconBtn) playIconBtn.className = 'fa-solid fa-play text-xs';
+                currentlyPlayingVoiceId = null;
+            }
+
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Generate Voice`;
+            
+            customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-play text-lg"></i>`;
+            playerSeeker.value = 0;
+            playerTime.innerText = "0:00 / 0:00";
+            
+            alert("Speech generation stopped!");
+        };
+
+        // CUSTOM PLAYER INTERFACE LOGIC
+        customPlayPauseBtn.onclick = function() {
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-pause text-lg"></i>`;
+            } else {
+                audioPlayer.pause();
+                customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-play text-lg"></i>`;
+            }
+        };
+
+        // Update seeker bar position as audio plays
+        audioPlayer.ontimeupdate = function() {
+            if (audioPlayer.duration) {
+                const percentage = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                playerSeeker.value = percentage;
+                
+                // Format times
+                playerTime.innerText = `${formatTime(audioPlayer.currentTime)} / ${formatTime(audioPlayer.duration)}`;
+            }
+        };
+
+        // Drag seeker to play back and forth (—•—)
+        playerSeeker.oninput = function() {
+            if (audioPlayer.duration) {
+                const newTime = (playerSeeker.value / 100) * audioPlayer.duration;
+                audioPlayer.currentTime = newTime;
+            }
+        };
+
+        // Toggle state back when audio ends
+        audioPlayer.onended = function() {
+            customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-play text-lg"></i>`;
+            playerSeeker.value = 100;
+        };
+
+        // Helper time formatter
+        function formatTime(secs) {
+            const minutes = Math.floor(secs / 60);
+            const seconds = Math.floor(secs % 60);
+            return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
 
         renderVoices();
