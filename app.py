@@ -5,9 +5,8 @@ import edge_tts
 
 app = Flask(__name__)
 PORT = int(os.environ.get("PORT", 10000))
-# Vercel par temporary files likhne ke liye '/tmp' use karna zaroori hai
 BASE_DIR = "/tmp" 
-HTML_DIR = os.getcwd() # index.html main directory se load hogi
+HTML_DIR = os.getcwd()
 
 async def generate_voice_async(text, voice, output_path):
     communicate = edge_tts.Communicate(text, voice)
@@ -22,13 +21,23 @@ def preview():
     data = request.json
     voice = data.get('voice', 'ur-PK-UzmaNeural')
 
-    preview_text = "Welcome to Fatima TTS Studio. Testing this voice now."
+    # Default Preview Text according to Language/Country
     if voice.startswith("ur-PK") or voice.startswith("ur-IN"):
-        preview_text = "ویڈیو بنانے کے لیے یہ آواز بالکل ٹھیک رہے گی۔"
+        preview_text = "فاطمہ ٹی ٹی ایس اسٹوڈیو میں آپ کا خوش آمدید ہے۔"
     elif voice.startswith("hi-IN"):
         preview_text = "फ़ातिमा टीटीएस स्टूडियो में आपका स्वागत है।"
+    elif voice.startswith("en-"):
+        preview_text = "Welcome to the Fatima T.T.S. Studio."
+    elif voice.startswith("es-"):
+        preview_text = "Bienvenido a Fatima T.T.S. Studio."
     elif voice.startswith("ar-"):
         preview_text = "مرحباً بكم في استوديو فاطمة للأصوات."
+    elif voice.startswith("af-"):
+        preview_text = "Welkom by Fatima T.T.S. Studio."
+    elif voice.startswith("he-"):
+        preview_text = "ברוכים הבאים לסטודיו פאטימה."
+    else:
+        preview_text = "Welcome to Fatima TTS Studio."
 
     output_file = f"preview-{voice}.mp3"
     output_path = os.path.join(BASE_DIR, output_file)
@@ -38,8 +47,14 @@ def preview():
         except: pass
 
     try:
+        # Try running generation with a short timeout/retry
         asyncio.run(generate_voice_async(preview_text, voice, output_path))
-        return jsonify({"success": True, "audio_url": f"/download/{output_file}?v={os.urandom(4).hex()}"})
+        
+        # Check if file was actually written and has size
+        if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+            return jsonify({"success": True, "audio_url": f"/download/{output_file}?v={os.urandom(4).hex()}"})
+        else:
+            return jsonify({"success": False, "error": "Zero-byte file generated. Server connection timed out. Please try again."})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
@@ -61,7 +76,10 @@ def generate():
 
     try:
         asyncio.run(generate_voice_async(text, voice, output_path))
-        return jsonify({"success": True, "audio_url": f"/download/{output_file}?v={os.urandom(4).hex()}"})
+        if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+            return jsonify({"success": True, "audio_url": f"/download/{output_file}?v={os.urandom(4).hex()}"})
+        else:
+            return jsonify({"success": False, "error": "Server failed to process TTS. Please try again."})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
