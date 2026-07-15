@@ -37,7 +37,7 @@
             border-color: #a855f7;
             box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
         }
-        /* Custom Seek Slider Range Styling */
+        /* Custom Seek Slider Range Styling (Real & Smooth) */
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
@@ -125,7 +125,7 @@
             <!-- Voice Cards dynamically injected here -->
         </div>
 
-        <!-- Action Button Panel (Generate & Stop - Cleaned Icon) -->
+        <!-- Action Button Panel (Generate & Stop) -->
         <div class="flex space-x-3 mb-6 relative z-10">
             <button id="generateBtn" class="flex-2 w-3/4 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-purple-600/20 transition duration-300 flex items-center justify-center">
                 <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
@@ -136,7 +136,7 @@
             </button>
         </div>
 
-        <!-- Custom Luxury Audio Player Box -->
+        <!-- Custom Luxury Audio Player Box with Real Timer & Download Button -->
         <div id="audioPlayerContainer" class="p-4 bg-gradient-to-r from-purple-950/40 to-indigo-950/40 rounded-2xl border border-white/10 hidden relative z-10 shadow-inner">
             <div class="flex items-center space-x-4">
                 <!-- Play/Pause Button -->
@@ -150,9 +150,14 @@
                         <span class="text-xs text-gray-400 font-semibold tracking-wider uppercase">Voice Output</span>
                         <span id="playerTime" class="text-xs text-gray-400 font-medium">0:00 / 0:00</span>
                     </div>
-                    <!-- Stylish Seeker Bar (—•—) -->
+                    <!-- Real Timer Progress Line (—•—) -->
                     <input type="range" id="playerSeeker" value="0" min="0" max="100" class="w-full">
                 </div>
+
+                <!-- Action Buttons: Download Button added! -->
+                <button id="downloadBtn" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-purple-600/20 border border-white/10 flex items-center justify-center text-gray-300 hover:text-white transition duration-200 shadow-md">
+                    <i class="fa-solid fa-download text-base"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -242,6 +247,7 @@
         const audioPlayerContainer = document.getElementById('audioPlayerContainer');
         const audioPlayer = document.getElementById('audioPlayer');
         const silentPreviewPlayer = document.getElementById('silentPreviewPlayer');
+        const downloadBtn = document.getElementById('downloadBtn');
         
         // Custom Player Elements
         const customPlayPauseBtn = document.getElementById('customPlayPauseBtn');
@@ -402,7 +408,7 @@
             renderVoices(true, searchInput.value);
         };
 
-        // Main Voice Generation Action
+        // Main Voice Generation Action (Guarantees Full Audio Stream)
         generateBtn.onclick = async function() {
             const text = scriptText.value.trim();
             if (!text) {
@@ -424,22 +430,31 @@
                     body: JSON.stringify({ text: text, voice: selectedVoice })
                 });
                 const data = await response.json();
+                
                 if (data.success) {
+                    // Preload audio and wait for metadata to ensure duration is loaded correctly
                     audioPlayer.src = data.audio_url;
-                    audioPlayerContainer.classList.remove('hidden');
-                    audioPlayer.play();
+                    audioPlayer.load();
+                    
+                    audioPlayer.onloadedmetadata = function() {
+                        audioPlayerContainer.classList.remove('hidden');
+                        playerSeeker.max = Math.floor(audioPlayer.duration);
+                        playerTime.innerText = `0:00 / ${formatTime(audioPlayer.duration)}`;
+                        audioPlayer.play();
+                        customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-pause text-lg"></i>`;
+                    };
                 } else {
                     alert("Generation failed: " + data.error);
                 }
             } catch (err) {
-                alert("Server Error! Make sure server is running.");
+                alert("Server Connection Error! Please try again.");
             } finally {
                 generateBtn.disabled = false;
                 generateBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Generate Voice`;
             }
         };
 
-        // STOP Generation (Alert Completely Removed!)
+        // STOP Generation
         stopBtn.onclick = async function() {
             try {
                 await fetch('/stop', { method: 'POST' });
@@ -475,31 +490,42 @@
             }
         };
 
-        // Update seeker bar position as audio plays
+        // Real-time Smooth Progress Line Update (Strictly matching real duration)
         audioPlayer.ontimeupdate = function() {
             if (audioPlayer.duration) {
-                const percentage = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-                playerSeeker.value = percentage;
+                playerSeeker.value = Math.floor(audioPlayer.currentTime);
                 playerTime.innerText = `${formatTime(audioPlayer.currentTime)} / ${formatTime(audioPlayer.duration)}`;
             }
         };
 
-        // Drag seeker to play back and forth (—•—)
+        // Drag/Click seeker bar to play back and forth smoothly
         playerSeeker.oninput = function() {
-            if (audioPlayer.duration) {
-                const newTime = (playerSeeker.value / 100) * audioPlayer.duration;
-                audioPlayer.currentTime = newTime;
-            }
+            audioPlayer.currentTime = playerSeeker.value;
         };
 
-        // Toggle state back when audio ends
+        // Reset player UI state when audio ends
         audioPlayer.onended = function() {
             customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-play text-lg"></i>`;
-            playerSeeker.value = 100;
+            playerSeeker.value = 0;
+        };
+
+        // Download Action (Triggering browser native direct download)
+        downloadBtn.onclick = function() {
+            if (audioPlayer.src) {
+                const link = document.createElement('a');
+                link.href = audioPlayer.src;
+                link.download = `FatimaTTS-${selectedVoice}.mp3`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert("Pehle koi voice generate karein!");
+            }
         };
 
         // Helper time formatter
         function formatTime(secs) {
+            if (isNaN(secs)) return "0:00";
             const minutes = Math.floor(secs / 60);
             const seconds = Math.floor(secs % 60);
             return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
