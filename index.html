@@ -125,14 +125,14 @@
             <!-- Voice Cards dynamically injected here -->
         </div>
 
-        <!-- Action Button Panel (Generate & Stop) -->
+        <!-- Action Button Panel (Generate & Stop - Cleaned Icon) -->
         <div class="flex space-x-3 mb-6 relative z-10">
             <button id="generateBtn" class="flex-2 w-3/4 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-purple-600/20 transition duration-300 flex items-center justify-center">
                 <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
                 <span>Generate Voice</span>
             </button>
             <button id="stopBtn" class="flex-1 w-1/4 py-4 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 text-red-400 font-semibold rounded-xl transition duration-300 flex items-center justify-center">
-                <i class="fa-solid fa-circle-stop mr-2"></i> Stop
+                Stop
             </button>
         </div>
 
@@ -439,14 +439,12 @@
             }
         };
 
-        // STOP Generation & Speech Button Logic
+        // STOP Generation (Alert Completely Removed!)
         stopBtn.onclick = async function() {
-            // Stop background TTS audio generation endpoint request
             try {
                 await fetch('/stop', { method: 'POST' });
             } catch (e) {}
 
-            // Immediately pause and clear the players
             audioPlayer.pause();
             audioPlayer.currentTime = 0;
             silentPreviewPlayer.pause();
@@ -464,8 +462,6 @@
             customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-play text-lg"></i>`;
             playerSeeker.value = 0;
             playerTime.innerText = "0:00 / 0:00";
-            
-            alert("Speech generation stopped!");
         };
 
         // CUSTOM PLAYER INTERFACE LOGIC
@@ -484,8 +480,6 @@
             if (audioPlayer.duration) {
                 const percentage = (audioPlayer.currentTime / audioPlayer.duration) * 100;
                 playerSeeker.value = percentage;
-                
-                // Format times
                 playerTime.innerText = `${formatTime(audioPlayer.currentTime)} / ${formatTime(audioPlayer.duration)}`;
             }
         };
