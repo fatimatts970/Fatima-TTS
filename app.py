@@ -4,9 +4,10 @@ import asyncio
 import edge_tts
 
 app = Flask(__name__)
-# Render automatically port provide karta hai, agar na ho to 10000 par chalega
 PORT = int(os.environ.get("PORT", 10000))
-BASE_DIR = os.getcwd()
+# Vercel par temporary files likhne ke liye '/tmp' use karna zaroori hai
+BASE_DIR = "/tmp" 
+HTML_DIR = os.getcwd() # index.html main directory se load hogi
 
 async def generate_voice_async(text, voice, output_path):
     communicate = edge_tts.Communicate(text, voice)
@@ -14,7 +15,7 @@ async def generate_voice_async(text, voice, output_path):
 
 @app.route('/')
 def index():
-    return send_from_directory(BASE_DIR, 'index.html')
+    return send_from_directory(HTML_DIR, 'index.html')
 
 @app.route('/preview', methods=['POST'])
 def preview():
@@ -25,7 +26,7 @@ def preview():
     if voice.startswith("ur-PK") or voice.startswith("ur-IN"):
         preview_text = "ویڈیو بنانے کے لیے یہ آواز بالکل ٹھیک رہے گی۔"
     elif voice.startswith("hi-IN"):
-        preview_text = "फ़ातिما टीटीएस स्टूडियो में आपका स्वागत है।"
+        preview_text = "फ़ातिमा टीटीएस स्टूडियो में आपका स्वागत है।"
     elif voice.startswith("ar-"):
         preview_text = "مرحباً بكم في استوديو فاطمة للأصوات."
 
