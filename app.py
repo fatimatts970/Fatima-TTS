@@ -3,11 +3,27 @@ import os
 import asyncio
 import edge_tts
 import random
+import time
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 PORT = int(os.environ.get("PORT", 10000))
-BASE_DIR = "/tmp" 
+BASE_DIR = "/tmp"
 HTML_DIR = os.getcwd()
+
+def cleanup_tmp():
+    now = time.time()
+    try:
+        for file in os.listdir(BASE_DIR):
+            if file.endswith(".mp3"):
+                path = os.path.join(BASE_DIR, file)
+                try:
+                    if os.path.isfile(path) and now - os.path.getmtime(path) > 600:
+                        os.remove(path)
+                except:
+                    pass
+    except:
+        pass
 
 async def generate_voice_async(text, voice, output_path):
     communicate = edge_tts.Communicate(text, voice)
@@ -19,10 +35,10 @@ def index():
 
 @app.route('/preview', methods=['POST'])
 def preview():
-    data = request.json
+    cleanup_tmp()
+    data = request.json or {}
     voice = data.get('voice', 'ur-PK-UzmaNeural')
-
-    if voice.startswith("ur-PK") or voice.startswith("ur-IN"):
+    if voice.startswith(("ur-PK","ur-IN")):
         preview_text = "فاطمہ ٹی ٹی ایس اسٹوڈیو میں آپ کا خوش آمدید ہے۔"
     elif voice.startswith("hi-IN"):
         preview_text = "फ़ातिमा टीटीएस स्टूडियो में आपका स्वागत है।"
@@ -38,57 +54,49 @@ def preview():
         preview_text = "ברוכים הבאים לסטודיו פאטימה."
     else:
         preview_text = "Welcome to Fatima TTS Studio."
-
-    output_file = f"preview-{voice}.mp3"
-    output_path = os.path.join(BASE_DIR, output_file)
-
+    output_file=f"preview-{voice}.mp3"
+    output_path=os.path.join(BASE_DIR,output_file)
     if os.path.exists(output_path):
         try: os.remove(output_path)
         except: pass
-
     try:
-        asyncio.run(generate_voice_async(preview_text, voice, output_path))
-        if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
-            return jsonify({"success": True, "audio_url": f"/download/{output_file}?v={os.urandom(4).hex()}"})
-        else:
-            return jsonify({"success": False, "error": "Zero-byte file generated."})
+        asyncio.run(generate_voice_async(preview_text,voice,output_path))
+        if os.path.exists(output_path) and os.path.getsize(output_path)>0:
+            return jsonify({"success":True,"audio_url":f"/download/{output_file}?v={os.urandom(4).hex()}"})
+        return jsonify({"success":False,"error":"Zero-byte file generated."})
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+        return jsonify({"success":False,"error":str(e)})
 
-@app.route('/generate', methods=['POST'])
+@app.route('/generate',methods=['POST'])
 def generate():
-    data = request.json
-    text = data.get('text', '')
-    voice = data.get('voice', 'ur-PK-UzmaNeural')
-
-    if not text.strip():
-        return jsonify({"success": False, "error": "Script is empty!"})
-
-    # Lakhon carororen mein se random number generate karne ke liye range barha di hai
-    random_num = random.randint(100000000000000000, 999999999999999999)
-    output_file = f"FatimaTTS-{random_num}.mp3"
-    output_path = os.path.join(BASE_DIR, output_file)
-
+    cleanup_tmp()
+    data=request.json or {}
+    text=data.get('text','').strip()
+    voice=data.get('voice','ur-PK-UzmaNeural')
+    if not text:
+        return jsonify({"success":False,"error":"Script is empty!"})
+    if len(text)>100000:
+        return jsonify({"success":False,"error":"Maximum limit is 100000 characters."})
+    random_num=random.randint(100000000000000000,999999999999999999)
+    output_file=f"FatimaTTS-{random_num}.mp3"
+    output_path=os.path.join(BASE_DIR,output_file)
     try:
-        asyncio.run(generate_voice_async(text, voice, output_path))
-        if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
-            return jsonify({
-                "success": True, 
-                "audio_url": f"/download/{output_file}?v={os.urandom(4).hex()}",
-                "filename": output_file
-            })
-        else:
-            return jsonify({"success": False, "error": "Server failed to process TTS."})
+        asyncio.run(generate_voice_async(text,voice,output_path))
+        if os.path.exists(output_path) and os.path.getsize(output_path)>0:
+            return jsonify({"success":True,"audio_url":f"/download/{output_file}?v={os.urandom(4).hex()}","filename":output_file})
+        return jsonify({"success":False,"error":"Server failed to process TTS."})
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+        return jsonify({"success":False,"error":str(e)})
 
-@app.route('/stop', methods=['POST'])
+@app.route('/stop',methods=['POST'])
 def stop():
-    return jsonify({"success": True})
+    return jsonify({"success":True})
 
 @app.route('/download/<filename>')
 def download_file(filename):
-    return send_from_directory(BASE_DIR, filename)
+    cleanup_tmp()
+    filename=secure_filename(filename)
+    return send_from_directory(BASE_DIR,filename,as_attachment=False)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=PORT)
+if __name__=="__main__":
+    app.run(host="0.0.0.0",port=PORT)
