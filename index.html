@@ -3,7 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fatima TTS - Premium Voice Studio</title>
+    <title>Fatima TTS Studio - Free Online Text to Speech Converter | 35+ Premium Voices</title>
+    <meta name="description" content="Convert text to natural, human-like speech for free with Fatima TTS Studio. Choose from 35+ premium voices in Urdu, Hindi, English, Arabic, Spanish, French and more. Instant preview, download as MP3.">
+    <meta name="keywords" content="text to speech, TTS, Fatima TTS, free text to speech, Urdu text to speech, online voice generator, AI voice, text to voice converter, MP3 voice generator, natural voice AI">
+
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="Fatima TTS Studio - Free Online Text to Speech Converter">
+    <meta property="og:description" content="Convert text to natural, human-like speech for free with 35+ premium global voices. Instant preview and MP3 download.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fatima-tts.vercel.app/">
+    <meta property="og:image" content="https://fatima-tts.vercel.app/og-image.png">
+
     <!-- Tailwind CSS & Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -116,11 +126,11 @@
         <!-- Text Area Box with Characters Counter Integration & Accurate Alignment Fix -->
         <div class="mb-6 relative z-10">
             <div class="relative">
-                <textarea id="scriptText" placeholder="Enter your text script here..." 
+                <textarea id="scriptText" placeholder="Enter your text script here..." maxlength="100000"
                     class="w-full h-32 px-4 py-3 pt-4 bg-black/20 border border-white/20 rounded-xl focus:outline-none focus:border-white text-white placeholder-white/50 resize-none transition duration-300 text-left" dir="ltr"></textarea>
                 <!-- Character Counter Placement Option -->
-                <div class="absolute bottom-2.5 left-3.5 bg-black/40 px-2 py-0.5 rounded-md text-[10px] tracking-wide font-mono text-white/80 border border-white/10">
-                    <span id="charCount">0</span> Characters
+                <div id="charCounterBox" class="absolute bottom-2.5 left-3.5 bg-black/40 px-2 py-0.5 rounded-md text-[10px] tracking-wide font-mono text-white/80 border border-white/10">
+                    <span id="charCount">0</span> / 100000 Characters
                 </div>
             </div>
         </div>
@@ -358,6 +368,8 @@
         const audioPlayer = document.getElementById('audioPlayer');
         const silentPreviewPlayer = document.getElementById('silentPreviewPlayer');
         const downloadBtn = document.getElementById('downloadBtn');
+        const charCounterBox = document.getElementById('charCounterBox');
+        const MAX_CHAR_LIMIT = 100000;
         
         const customPlayPauseBtn = document.getElementById('customPlayPauseBtn');
         const playerSeeker = document.getElementById('playerSeeker');
@@ -365,7 +377,16 @@
 
         // Character tracking count logic
         scriptText.addEventListener('input', function() {
-            charCount.innerText = this.value.length;
+            const len = this.value.length;
+            charCount.innerText = len;
+
+            if (len > MAX_CHAR_LIMIT) {
+                charCounterBox.classList.remove('text-white/80');
+                charCounterBox.classList.add('text-red-400', 'border-red-400/50');
+            } else {
+                charCounterBox.classList.add('text-white/80');
+                charCounterBox.classList.remove('text-red-400', 'border-red-400/50');
+            }
         });
 
         // FAQ accordion management toggle
@@ -535,6 +556,13 @@
             const text = scriptText.value.trim();
             if (!text) {
                 alert("Please enter a text script first!");
+                return;
+            }
+
+            if (text.length > MAX_CHAR_LIMIT) {
+                charCounterBox.classList.remove('text-white/80');
+                charCounterBox.classList.add('text-red-400', 'border-red-400/50');
+                alert("Maximum limit is 100000 characters.");
                 return;
             }
 
