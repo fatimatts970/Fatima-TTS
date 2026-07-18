@@ -97,6 +97,20 @@ def download_file(filename):
     cleanup_tmp()
     filename=secure_filename(filename)
     return send_from_directory(BASE_DIR,filename,as_attachment=False)
+@app.route("/about")
+def about():
+    return send_from_directory(HTML_DIR, "about.html")
 
+@app.route("/privacy")
+def privacy():
+    return send_from_directory(HTML_DIR, "privacy.html")
+
+@app.route("/terms")
+def terms():
+    return send_from_directory(HTML_DIR, "terms.html")
+
+@app.route("/contact")
+def contact():
+    return send_from_directory(HTML_DIR, "contact.html")
 if __name__=="__main__":
     app.run(host="0.0.0.0",port=PORT)
