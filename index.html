@@ -13,39 +13,39 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background: radial-gradient(circle at center, #1e1035 0%, #090314 100%);
+            background: linear-gradient(180deg, #155dfc 0%, #0a46c8 100%);
             min-height: 100vh;
         }
         .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 24px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
         }
         .voice-card {
             transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
         }
         .voice-card:hover {
             transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(168, 85, 247, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
         }
         .voice-card.selected {
-            background: linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(79, 70, 229, 0.2) 100%);
-            border-color: #a855f7;
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+            background: rgba(255, 255, 255, 0.25);
+            border-color: #ffffff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
         }
-        /* Custom Seek Slider Range Styling (Real & Smooth) */
+        /* Seek Slider Box Layout */
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.3);
             border-radius: 10px;
             height: 6px;
             outline: none;
-            transition: background 0.3s;
         }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -53,138 +53,223 @@
             width: 14px;
             height: 14px;
             border-radius: 50%;
-            background: #a855f7;
+            background: #ffffff;
             cursor: pointer;
-            box-shadow: 0 0 8px #a855f7;
-            transition: transform 0.1s;
-        }
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.3);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
         }
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.05);
         }
         ::-webkit-scrollbar-thumb {
-            background: rgba(168, 85, 247, 0.3);
+            background: rgba(255, 255, 255, 0.3);
             border-radius: 10px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(168, 85, 247, 0.5);
+        /* FAQ Dropdown transitions */
+        .faq-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .faq-item.active .faq-content {
+            max-height: 200px;
+        }
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
         }
     </style>
 </head>
-<body class="text-gray-100 flex flex-col items-center justify-center p-4 md:p-8">
+<body class="text-white flex flex-col items-center p-4 md:p-8">
 
-    <div class="w-full max-w-lg glass-card p-6 md:p-8 relative overflow-hidden">
-        <!-- Background Glows -->
-        <div class="absolute -top-24 -left-24 w-48 h-48 bg-purple-600 rounded-full blur-[80px] opacity-30"></div>
-        <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-600 rounded-full blur-[80px] opacity-30"></div>
-
-        <!-- Logo & Header -->
-        <div class="text-center mb-6 relative z-10">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-blue-500 shadow-lg shadow-purple-500/30 mb-3">
-                <span class="text-3xl font-extrabold text-white tracking-wider">F</span>
+    <!-- Top Navigation Header Brand Bar (Corner Logo Style Like TikSav) -->
+    <header class="w-full max-w-lg flex items-center justify-between mb-8 px-2 relative z-10">
+        <a href="/" class="flex items-center space-x-2 group">
+            <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-md shadow-black/10 transition-transform group-hover:scale-105">
+                <i class="fa-solid fa-microphone-lines text-[#155dfc] text-lg"></i>
             </div>
-            <h1 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">Fatima TTS</h1>
-            <p class="text-xs uppercase tracking-widest text-gray-400 font-semibold mt-1">Premium Voice Studio</p>
-            
-            <!-- Yellow Color Counter Line -->
-            <p class="text-sm text-yellow-400 font-medium tracking-wide mt-3">
-                <i class="fa-solid fa-bolt mr-1 animate-pulse"></i> Total 35 Premium Global Voices Active Hain!
+            <div class="flex flex-col">
+                <span class="text-lg font-black tracking-tight text-white leading-none">Fatima<span class="text-blue-200">TTS</span></span>
+                <span class="text-[9px] font-bold tracking-widest text-white/70 uppercase">Studio</span>
+            </div>
+        </a>
+        <div class="flex items-center bg-white/10 border border-white/20 rounded-full px-3 py-1 text-xs">
+            <i class="fa-solid fa-globe mr-1.5 text-white/80"></i>
+            <span class="font-medium">UR / EN</span>
+        </div>
+    </header>
+
+    <!-- Main Studio Dashboard Container Box -->
+    <div class="w-full max-w-lg glass-card p-6 md:p-8 relative overflow-hidden mb-8">
+        <!-- Main Headline View Wrapped in Single Line -->
+        <div class="text-center mb-6 relative z-10">
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight text-white whitespace-nowrap overflow-hidden text-ellipsis">
+                Fatima Text To Speech Studio
+            </h1>
+            <p class="text-xs text-white/80 font-medium tracking-wide mt-2">
+                <i class="fa-solid fa-bolt mr-1 text-yellow-300 animate-pulse"></i> Total 35 Premium Global Voices Active Hain!
             </p>
         </div>
 
-        <!-- Text Area -->
+        <!-- Text Area Box with Characters Counter Integration -->
         <div class="mb-6 relative z-10">
-            <textarea id="scriptText" placeholder="Apni script yahan likhein..." 
-                class="w-full h-32 px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-purple-500 text-gray-100 placeholder-gray-500 resize-none transition duration-300 text-right" dir="auto"></textarea>
+            <div class="relative">
+                <textarea id="scriptText" placeholder="Apni script yahan likhein..." 
+                    class="w-full h-32 px-4 py-3 bg-black/20 border border-white/20 rounded-xl focus:outline-none focus:border-white text-white placeholder-white/50 resize-none transition duration-300 text-right" dir="auto"></textarea>
+                <!-- Character Counter Placement Option -->
+                <div class="absolute bottom-2.5 left-3.5 bg-black/40 px-2 py-0.5 rounded-md text-[10px] tracking-wide font-mono text-white/80 border border-white/10">
+                    <span id="charCount">0</span> Characters
+                </div>
+            </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="flex space-x-2 bg-white/5 p-1 rounded-xl mb-4 relative z-10">
-            <button id="allVoicesTab" class="flex-1 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow">
+        <!-- Tabs Framework -->
+        <div class="flex space-x-2 bg-black/20 p-1 rounded-xl mb-4 relative z-10">
+            <button id="allVoicesTab" class="flex-1 py-2 text-sm font-medium rounded-lg bg-white text-[#155dfc] shadow-md font-bold">
                 <i class="fa-solid fa-microphone-lines mr-1.5"></i> All Voices
             </button>
-            <button id="favoritesTab" class="flex-1 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white transition">
-                <i class="fa-solid fa-star mr-1.5 text-yellow-500"></i> Favorites
+            <button id="favoritesTab" class="flex-1 py-2 text-sm font-medium rounded-lg text-white hover:bg-white/10 transition font-semibold">
+                <i class="fa-solid fa-star mr-1.5 text-yellow-300"></i> Favorites
             </button>
         </div>
 
-        <!-- Search Bar -->
+        <!-- Search Input Pipeline Bar -->
         <div class="mb-4 relative z-10">
             <input type="text" id="searchVoices" placeholder="Search language or voice..." 
-                class="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-purple-500 text-sm text-gray-200 placeholder-gray-500 transition duration-300">
+                class="w-full px-4 py-2 bg-black/20 border border-white/20 rounded-xl focus:outline-none focus:border-white text-sm text-white placeholder-white/40 transition duration-300">
         </div>
 
-        <!-- Voices List Container -->
+        <!-- Voices List Container View -->
         <div class="h-64 overflow-y-auto space-y-2 mb-6 pr-1 relative z-10" id="voicesContainer">
-            <!-- Voice Cards dynamically injected here -->
+            <!-- Dynamically loaded cards -->
         </div>
 
-        <!-- Action Button Panel (Generate & Stop) -->
+        <!-- Action Button Control Panel (Generate & Stop) -->
         <div class="flex space-x-3 mb-6 relative z-10">
-            <button id="generateBtn" class="flex-2 w-3/4 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-purple-600/20 transition duration-300 flex items-center justify-center">
+            <button id="generateBtn" class="flex-2 w-3/4 py-4 bg-white hover:bg-white/90 text-[#155dfc] font-bold rounded-xl shadow-lg shadow-black/10 transition duration-300 flex items-center justify-center">
                 <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
                 <span>Generate Voice</span>
             </button>
-            <button id="stopBtn" class="flex-1 w-1/4 py-4 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 text-red-400 font-semibold rounded-xl transition duration-300 flex items-center justify-center">
+            <button id="stopBtn" class="flex-1 w-1/4 py-4 bg-red-600/30 hover:bg-red-600/50 border border-white/20 text-white font-semibold rounded-xl transition duration-300 flex items-center justify-center">
                 Stop
             </button>
         </div>
 
-        <!-- Custom Luxury Audio Player Box with Real Timer & Download Button -->
-        <div id="audioPlayerContainer" class="p-4 bg-gradient-to-r from-purple-950/40 to-indigo-950/40 rounded-2xl border border-white/10 hidden relative z-10 shadow-inner">
+        <!-- Custom Luxury Audio Player UI Component -->
+        <div id="audioPlayerContainer" class="p-4 bg-black/20 rounded-2xl border border-white/20 hidden relative z-10 shadow-inner">
             <div class="flex items-center space-x-4">
                 <!-- Play/Pause Button -->
-                <button id="customPlayPauseBtn" class="w-12 h-12 rounded-xl bg-purple-600 hover:bg-purple-500 flex items-center justify-center text-white shadow-md transition duration-200">
+                <button id="customPlayPauseBtn" class="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-[#155dfc] shadow-md transition duration-200 hover:scale-105">
                     <i class="fa-solid fa-play text-lg"></i>
                 </button>
                 
-                <!-- Progress & Details -->
+                <!-- Progress & Tracker Slider -->
                 <div class="flex-1 flex flex-col justify-center">
                     <div class="flex items-center justify-between mb-1">
-                        <span class="text-xs text-gray-400 font-semibold tracking-wider uppercase">Voice Output</span>
-                        <span id="playerTime" class="text-xs text-gray-400 font-medium">0:00 / 0:00</span>
+                        <span class="text-xs text-white/70 font-semibold tracking-wider uppercase">Voice Output</span>
+                        <span id="playerTime" class="text-xs text-white/80 font-medium">0:00 / 0:00</span>
                     </div>
-                    <!-- Real Timer Progress Line (—•—) -->
                     <input type="range" id="playerSeeker" value="0" min="0" max="100" class="w-full">
                 </div>
 
-                <!-- Action Buttons: Download Button -->
-                <button id="downloadBtn" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-purple-600/20 border border-white/10 flex items-center justify-center text-gray-300 hover:text-white transition duration-200 shadow-md">
+                <!-- Action Button Download Element -->
+                <button id="downloadBtn" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white transition duration-200 shadow-md">
                     <i class="fa-solid fa-download text-base"></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- ================= PREMIUM ADSENSE PAGES SECTION ================= -->
-    <footer class="w-full max-w-lg text-center py-6 mt-6 border-t border-white/10 text-xs text-gray-500 space-x-3 relative z-10">
-        <button onclick="openPolicy('about')" class="hover:text-purple-400 transition-colors">About Us</button>
-        <span>•</span>
-        <button onclick="openPolicy('privacy')" class="hover:text-purple-400 transition-colors">Privacy Policy</button>
-        <span>•</span>
-        <button onclick="openPolicy('terms')" class="hover:text-purple-400 transition-colors">Terms & Conditions</button>
-        <span>•</span>
-        <button onclick="openPolicy('contact')" class="hover:text-purple-400 transition-colors">Contact Us</button>
-    </footer>
+    <!-- ================= TOP CLASS SEO ARTICLE CONTENT AREA ================= -->
+    <div class="w-full max-w-lg bg-white text-slate-800 rounded-3xl p-6 md:p-8 shadow-xl space-y-6 text-sm mb-8">
+        <section class="border-b border-slate-100 pb-4">
+            <h2 class="text-xl font-bold text-slate-900 mb-2">How to Use Fatima Text To Speech Studio</h2>
+            <p class="text-slate-600 mb-4">Convert text documents into ultra-realistic premium global media voice tracks in three easy steps.</p>
+            
+            <div class="space-y-4">
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-[#155dfc] text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</div>
+                    <div>
+                        <h4 class="font-bold text-slate-900">Write or Paste Text Script</h4>
+                        <p class="text-slate-500 text-xs">Input your text draft inside the natural script console configured above.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-[#155dfc] text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</div>
+                    <div>
+                        <h4 class="font-bold text-slate-900">Select Global Voice Model</h4>
+                        <p class="text-slate-500 text-xs">Filter through the active list of 35 multi-language premium neural characters.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-[#155dfc] text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</div>
+                    <div>
+                        <h4 class="font-bold text-slate-900">Generate & Save High-Quality Audio</h4>
+                        <p class="text-slate-500 text-xs">Click the primary generation buttons to play outputs instantly or download secure files.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <!-- Dynamic Modal System -->
-    <div id="policyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-white/10 w-full max-w-md rounded-2xl max-h-[80vh] flex flex-col shadow-2xl">
-            <div class="p-4 border-b border-white/10 flex justify-between items-center">
-                <h3 id="modalTitle" class="text-sm font-bold text-white uppercase tracking-wider"></h3>
-                <button onclick="closePolicy()" class="text-gray-400 hover:text-white text-lg font-bold">&times;</button>
+        <section class="space-y-3">
+            <h3 class="text-lg font-bold text-slate-900">Why Choose Fatima TTS Studio?</h3>
+            <p class="text-slate-600 leading-relaxed text-xs">
+                Unlike common synthetic engines that produce mechanical voice dropouts, Fatima Text to Speech Studio leverages modern linguistic rendering models to serve realistic narration profiles. Perfect for professional content creation channels, text accessibility tasks, digital marketing scripts, and language localization tracks. The application is highly optimized to run smoothly on thin clients and browser engines without local hardware requirements.
+            </p>
+        </section>
+
+        <!-- ================= TOP CLASS DYNAMIC ACCORDION FAQS SECTION ================= -->
+        <section class="border-t border-slate-100 pt-5">
+            <h3 class="text-lg font-bold text-slate-900 mb-4">Frequently Asked Questions (FAQs)</h3>
+            <div class="space-y-2">
+                <div class="faq-item border border-slate-200 rounded-xl p-3.5 cursor-pointer transition-colors hover:bg-slate-50" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between font-semibold text-slate-900 text-xs">
+                        <span>Is Fatima TTS Studio free to use?</span>
+                        <i class="fa-solid fa-plus faq-icon transition-transform duration-200 text-[#155dfc]"></i>
+                    </div>
+                    <div class="faq-content text-slate-500 text-[11px] mt-2 leading-relaxed">
+                        Yes, our conversion interface functions entirely free without hidden subscription pipelines, premium account caps, or forced credential sign-up conditions.
+                    </div>
+                </div>
+
+                <div class="faq-item border border-slate-200 rounded-xl p-3.5 cursor-pointer transition-colors hover:bg-slate-50" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between font-semibold text-slate-900 text-xs">
+                        <span>Does the tool support both Android and iOS devices?</span>
+                        <i class="fa-solid fa-plus faq-icon transition-transform duration-200 text-[#155dfc]"></i>
+                    </div>
+                    <div class="faq-content text-slate-500 text-[11px] mt-2 leading-relaxed">
+                        Yes, the clean architecture is responsive and fully compatible across Chrome, Safari, Firefox, and Samsung Internet environments without additional plugin packages.
+                    </div>
+                </div>
+
+                <div class="faq-item border border-slate-200 rounded-xl p-3.5 cursor-pointer transition-colors hover:bg-slate-50" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between font-semibold text-slate-900 text-xs">
+                        <span>What is the file download format?</span>
+                        <i class="fa-solid fa-plus faq-icon transition-transform duration-200 text-[#155dfc]"></i>
+                    </div>
+                    <div class="faq-content text-slate-500 text-[11px] mt-2 leading-relaxed">
+                        All successfully processed natural language inputs are compiled down into fully standard high-bitrate MP3 structures to guarantee playback support everywhere.
+                    </div>
+                </div>
             </div>
-            <div id="modalContent" class="p-5 overflow-y-auto text-xs text-gray-400 space-y-3 leading-relaxed">
-                <!-- Content Data -->
-            </div>
-        </div>
+        </section>
     </div>
+
+    <!-- ================= PREMIUM EXTERNAL ADSENES COMPLIANT FOOTER ================= -->
+    <footer class="w-full max-w-lg text-center py-6 border-t border-white/20 text-xs text-white/60 space-x-3 relative z-10">
+        <!-- Re-routed to open natively in absolute standalone New Windows/Tabs -->
+        <a href="/about" target="_blank" class="hover:text-white transition-colors">About Us</a>
+        <span>•</span>
+        <a href="/privacy" target="_blank" class="hover:text-white transition-colors">Privacy Policy</a>
+        <span>•</span>
+        <a href="/terms" target="_blank" class="hover:text-white transition-colors">Terms & Conditions</a>
+        <span>•</span>
+        <a href="/contact" target="_blank" class="hover:text-white transition-colors">Contact Us</a>
+        
+        <p class="text-[10px] text-white/40 mt-4">&copy; 2026 Fatima TTS Studio. All rights reserved.</p>
+    </footer>
 
     <!-- Hidden Background Audio Players -->
     <audio id="audioPlayer" style="display: none;"></audio>
@@ -262,21 +347,35 @@
         let selectedVoice = "ur-PK-UzmaNeural";
         let favorites = JSON.parse(localStorage.getItem('tts_favorites')) || [];
         let currentlyPlayingVoiceId = null;
-        let generatedFileName = ""; // Globally store unique filename
+        let generatedFileName = "";
 
         const voicesContainer = document.getElementById('voicesContainer');
         const generateBtn = document.getElementById('generateBtn');
         const scriptText = document.getElementById('scriptText');
+        const charCount = document.getElementById('charCount');
         const searchInput = document.getElementById('searchVoices');
         const audioPlayerContainer = document.getElementById('audioPlayerContainer');
         const audioPlayer = document.getElementById('audioPlayer');
         const silentPreviewPlayer = document.getElementById('silentPreviewPlayer');
         const downloadBtn = document.getElementById('downloadBtn');
         
-        // Custom Player Elements
         const customPlayPauseBtn = document.getElementById('customPlayPauseBtn');
         const playerSeeker = document.getElementById('playerSeeker');
         const playerTime = document.getElementById('playerTime');
+
+        // Dynamic 10000% Original Character Counter Tracker Option
+        scriptText.addEventListener('input', function() {
+            charCount.innerText = this.value.length;
+        });
+
+        // Accordion Selection Tracker Box
+        function toggleFaq(el) {
+            const isActive = el.classList.contains('active');
+            document.querySelectorAll('.faq-item').forEach(item => item.classList.remove('active'));
+            if (!isActive) {
+                el.classList.add('active');
+            }
+        }
 
         // Render Voice Cards
         function renderVoices(filterFavorites = false, query = "") {
@@ -291,7 +390,7 @@
             }
 
             if (listToRender.length === 0) {
-                voicesContainer.innerHTML = `<div class="text-center text-gray-500 py-10 text-sm">No voices found.</div>`;
+                voicesContainer.innerHTML = `<div class="text-center text-white/50 py-10 text-sm">No voices found.</div>`;
                 return;
             }
 
@@ -301,26 +400,26 @@
                 const isPlayingThis = voice.id === currentlyPlayingVoiceId;
 
                 const card = document.createElement('div');
-                card.className = `voice-card p-3 rounded-xl flex items-center justify-between cursor-pointer ${isSelected ? 'selected' : 'bg-white/5'}`;
+                card.className = `voice-card p-3 rounded-xl flex items-center justify-between cursor-pointer ${isSelected ? 'selected' : ''}`;
                 card.onclick = () => selectVoice(voice.id);
 
                 const isMale = voice.id.includes('Male') || voice.id.includes('Salman') || voice.id.includes('Madhur') || voice.id.includes('Karan') || voice.id.includes('Guy') || voice.id.includes('Ryan') || voice.id.includes('Hamed') || voice.id.includes('Jorge') || voice.id.includes('Willem') || voice.id.includes('Avri') || voice.id.includes('Steffan') || voice.id.includes('Andrew') || voice.id.includes('Brian') || voice.id.includes('William') || voice.id.includes('Prabhat') || voice.id.includes('Hamdan') || voice.id.includes('Alvaro') || voice.id.includes('Henri') || voice.id.includes('Conrad') || voice.id.includes('Ahmet') || voice.id.includes('Farid');
 
                 card.innerHTML = `
                     <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                        <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white">
                             <i class="fa-solid ${isMale ? 'fa-user-tie' : 'fa-user'}"></i>
                         </div>
                         <div>
-                            <p class="text-xs font-medium text-white">${voice.name}</p>
+                            <p class="text-xs font-semibold text-white">${voice.name}</p>
                         </div>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <button id="playBtn-${voice.id}" onclick="event.stopPropagation(); testVoice('${voice.id}')" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-purple-600/30 text-gray-400 hover:text-white flex items-center justify-center transition">
-                            <i class="fa-solid ${isPlayingThis ? 'fa-pause text-purple-400' : 'fa-play text-xs'}"></i>
+                        <button id="playBtn-${voice.id}" onclick="event.stopPropagation(); testVoice('${voice.id}')" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+                            <i class="fa-solid ${isPlayingThis ? 'fa-pause' : 'fa-play text-xs'}"></i>
                         </button>
-                        <button onclick="event.stopPropagation(); toggleFavorite('${voice.id}')" class="w-7 h-7 rounded-lg bg-white/5 text-gray-400 hover:text-yellow-500 flex items-center justify-center transition">
-                            <i class="fa-${isFav ? 'solid' : 'regular'} fa-star ${isFav ? 'text-yellow-500' : ''} text-xs"></i>
+                        <button onclick="event.stopPropagation(); toggleFavorite('${voice.id}')" class="w-7 h-7 rounded-lg bg-white/10 text-white hover:text-yellow-300 flex items-center justify-center transition">
+                            <i class="fa-${isFav ? 'solid' : 'regular'} fa-star ${isFav ? 'text-yellow-300' : ''} text-xs"></i>
                         </button>
                     </div>
                 `;
@@ -330,7 +429,7 @@
 
         function selectVoice(id) {
             selectedVoice = id;
-            const currentTab = document.getElementById('favoritesTab').classList.contains('text-white');
+            const currentTab = document.getElementById('favoritesTab').classList.contains('bg-white');
             renderVoices(currentTab, searchInput.value);
         }
 
@@ -341,12 +440,12 @@
                 favorites.push(id);
             }
             localStorage.setItem('tts_favorites', JSON.stringify(favorites));
-            const currentTab = document.getElementById('favoritesTab').classList.contains('text-white');
+            const currentTab = document.getElementById('favoritesTab').classList.contains('bg-white');
             renderVoices(currentTab, searchInput.value);
         }
 
         searchInput.oninput = function() {
-            const currentTab = document.getElementById('favoritesTab').classList.contains('text-white');
+            const currentTab = document.getElementById('favoritesTab').classList.contains('bg-white');
             renderVoices(currentTab, this.value);
         };
 
@@ -385,7 +484,7 @@
                     silentPreviewPlayer.src = data.audio_url;
                     
                     if (playIconBtn) {
-                        playIconBtn.className = 'fa-solid fa-pause text-purple-400';
+                        playIconBtn.className = 'fa-solid fa-pause';
                     }
                     silentPreviewPlayer.play();
                 } else {
@@ -398,7 +497,6 @@
             }
         }
 
-        // Silent player listeners
         silentPreviewPlayer.onended = function() {
             if (currentlyPlayingVoiceId) {
                 const playIconBtn = document.querySelector(`#playBtn-${currentlyPlayingVoiceId} i`);
@@ -421,14 +519,14 @@
 
         // Tabs Toggle
         document.getElementById('allVoicesTab').onclick = function() {
-            this.className = "flex-1 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow";
-            document.getElementById('favoritesTab').className = "flex-1 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white transition";
+            this.className = "flex-1 py-2 text-sm font-medium rounded-lg bg-white text-[#155dfc] shadow-md font-bold";
+            document.getElementById('favoritesTab').className = "flex-1 py-2 text-sm font-medium rounded-lg text-white hover:bg-white/10 transition font-semibold";
             renderVoices(false, searchInput.value);
         };
 
         document.getElementById('favoritesTab').onclick = function() {
-            this.className = "flex-1 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow";
-            document.getElementById('allVoicesTab').className = "flex-1 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white transition";
+            this.className = "flex-1 py-2 text-sm font-medium rounded-lg bg-white text-[#155dfc] shadow-md font-bold";
+            document.getElementById('allVoicesTab').className = "flex-1 py-2 text-sm font-medium rounded-lg text-white hover:bg-white/10 transition font-semibold";
             renderVoices(true, searchInput.value);
         };
 
@@ -456,7 +554,6 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Update global file name variable with randomized server-side filename
                     generatedFileName = data.filename;
                     
                     audioPlayer.src = data.audio_url;
@@ -516,7 +613,6 @@
             }
         };
 
-        // Real-time Smooth Progress Line Update
         audioPlayer.ontimeupdate = function() {
             if (audioPlayer.duration) {
                 playerSeeker.value = Math.floor(audioPlayer.currentTime);
@@ -524,23 +620,19 @@
             }
         };
 
-        // Drag/Click seeker bar
         playerSeeker.oninput = function() {
             audioPlayer.currentTime = playerSeeker.value;
         };
 
-        // Reset player UI state when audio ends
         audioPlayer.onended = function() {
             customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-play text-lg"></i>`;
             playerSeeker.value = 0;
         };
 
-        // Dynamic Randomized File Download Action
         downloadBtn.onclick = function() {
             if (audioPlayer.src && generatedFileName) {
                 const link = document.createElement('a');
                 link.href = audioPlayer.src;
-                // Seed custom randomized filename into the browser native download process
                 link.download = generatedFileName;
                 document.body.appendChild(link);
                 link.click();
@@ -550,57 +642,11 @@
             }
         };
 
-        // Helper time formatter
         function formatTime(secs) {
             if (isNaN(secs)) return "0:00";
             const minutes = Math.floor(secs / 60);
             const seconds = Math.floor(secs % 60);
             return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-        }
-
-        // AdSense Integration Data Array Configuration (Extended Professional Long Text Text-to-Speech Focus)
-        const pageData = {
-            about: {
-                title: "About Us",
-                content: `<p class='mb-3'>Welcome to <strong>Fatima TTS</strong>, an advanced premium voice studio engineered to provide comprehensive, high-performance web-based Text-to-Speech solutions. Our utility tool is designed specifically to convert raw text scripts into exceptionally crystal-clear, natural-sounding, and highly realistic voiceovers instantly across a wide range of global languages.</p>
-                          <p class='mb-3'>At Fatima TTS, we prioritize computational optimization and modern language interfaces to serve content creators, digital marketers, educators, and language professionals worldwide. By removing the traditional mechanical synthesis tone, our studio platform leverages robust digital media rendering pipelines to transform textual input configurations directly into seamless audio stream playbacks.</p>
-                          <p>We are consistently committed to refining neural voice technologies, optimizing speed latencies, and delivering accessible synthetic speech structures that allow developers and media designers to expand their production capabilities without specialized local audio hardware dependencies.</p>`
-            },
-            privacy: {
-                title: "Privacy Policy",
-                content: `<p class='mb-3'>At <strong>Fatima TTS</strong>, accessible from our official application interface, the privacy and operational security of our users are of paramount importance. This professional privacy documentation outlines the precise data handling practices, input protection protocols, and operational limitations enforced within our runtime infrastructure pipelines.</p>
-                          <p class='mb-3'><strong>1. Data Processing and Script Discarding Policies:</strong> We strictly operate under a strict zero-retention data standard. Any text script, input paragraph, or sentence configuration that you paste into our main system dashboard container is parsed directly in memory for immediate processing. We do not store, log, analyze, or archive your text data on any database arrays or storage logs. Once the synthesized voice track output is generated or the session is ended, all processed textual structures are permanently cleared from volatile server environments.</p>
-                          <p class='mb-3'><strong>2. Analytics and Browser Storage:</strong> To streamline user navigation features, our studio layout employs local caching mechanisms, such as localized browser tracking keys (e.g., <code>localStorage</code>), exclusively to retain user configurations such as the "Favorites" tab selection status. This data remains completely internal to your personal mobile or desktop device and is never submitted to exterior external servers. We do not use intrusive persistent advertisement cookies or background location metrics.</p>
-                          <p><strong>3. Third-Party Services:</strong> Our web hosting application utilizes standard structural analytics platforms to inspect basic incoming network request drops. By utilizing our utilities, you consent to our security boundaries intended to safeguard your active audio stream transmissions.</p>`
-            },
-            terms: {
-                title: "Terms & Conditions",
-                content: `<p class='mb-3'>Welcome to <strong>Fatima TTS</strong>. By accessing our responsive web-based studio platform, deploying our voice synthesis engines, or generating files from our premium dataset, you agree to fulfill the following comprehensive terms, condition rules, and legal system standards unconditionally.</p>
-                          <p class='mb-3'><strong>1. Permissible System Utilization:</strong> Users are granted a non-exclusive license to convert original textual scripts into public audio formats using the interface buttons provided. You agree to use these services safely and in a non-malicious manner. Any systematic attempt to deploy automated scraping routines, background scraping web spiders, or API flooding scripts against our processing networks is strictly prohibited to maintain premium speeds for everyone.</p>
-                          <p class='mb-3'><strong>2. Liability Disclaimers and Operational Status:</strong> The Fatima TTS voice generation engine is provided strictly on an 'as-is' and 'as-available' operational framework. We do not provide express warranties regarding unexpected service execution dropouts, runtime loading dropouts, or momentary latency shifts caused by public cloud hosting providers or underlying service changes.</p>
-                          <p><strong>3. Content Ownership:</strong> All audio clips generated through our dashboard belong entirely to the user for unrestricted personal or commercial media use, provided the text content follows legal web safety regulations. Violations of these infrastructure conditions may result in permanent automatic blocking from accessing the website tools.</p>`
-            },
-            contact: {
-                title: "Contact Us",
-                content: `<p class='mb-3'>If you have general inquiries, developer support requests, feedback on audio rendering accuracy, or detailed commercial partnership questions regarding <strong>Fatima TTS</strong>, our infrastructure support channels are fully available to assist you.</p>
-                          <p class='mb-3'>We strongly believe in consistent developer optimization and respond directly to detailed technical bugs or application layout error logs reported by our users.</p>
-                          <p class='mb-3'>Please direct all official communications and assistance queries via our primary email pipeline address:</p>
-                          <p class='text-purple-400 font-semibold mb-3 bg-white/5 p-2 rounded text-center border border-white/5'>anjaanshahzadi27@gmail.com</p>
-                          <p>Our dedicated management team reviews all incoming standard user tickets systematically and aims to provide clear, actionable feedback within 24 to 48 hours.</p>`
-            }
-        };
-
-        function openPolicy(key) {
-            document.getElementById('modalTitle').innerText = pageData[key].title;
-            document.getElementById('modalContent').innerHTML = pageData[key].content;
-            document.getElementById('policyModal').classList.remove('hidden');
-        }
-        function closePolicy() {
-            document.getElementById('policyModal').classList.add('hidden');
-        }
-        window.onclick = function(event) {
-            let m = document.getElementById('policyModal');
-            if (event.target == m) m.classList.add('hidden');
         }
 
         renderVoices();
