@@ -129,7 +129,7 @@
         <div class="flex space-x-3 mb-6 relative z-10">
             <button id="generateBtn" class="flex-2 w-3/4 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-purple-600/20 transition duration-300 flex items-center justify-center">
                 <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
-                <span>Generate Voice</span>
+                <span id="generateBtnText">Generate Voice</span>
             </button>
             <button id="stopBtn" class="flex-1 w-1/4 py-4 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 text-red-400 font-semibold rounded-xl transition duration-300 flex items-center justify-center">
                 Stop
@@ -263,9 +263,11 @@
         let favorites = JSON.parse(localStorage.getItem('tts_favorites')) || [];
         let currentlyPlayingVoiceId = null;
         let generatedFileName = ""; // Globally store unique filename
+        let countdownInterval = null; // Track explicit countdown ticks
 
         const voicesContainer = document.getElementById('voicesContainer');
         const generateBtn = document.getElementById('generateBtn');
+        const generateBtnText = document.getElementById('generateBtnText');
         const stopBtn = document.getElementById('stopBtn');
         const scriptText = document.getElementById('scriptText');
         const searchInput = document.getElementById('searchVoices');
@@ -433,6 +435,14 @@
             renderVoices(true, searchInput.value);
         };
 
+        // Clear countdown function helper
+        function clearCountdown() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+        }
+
         // Main Voice Generation Action (Unique file mapping)
         generateBtn.onclick = async function() {
             const text = scriptText.value.trim();
@@ -442,7 +452,22 @@
             }
 
             generateBtn.disabled = true;
-            generateBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-2"></i> Generating...`;
+            clearCountdown();
+
+            // Original 10000% Working Real-Time Countdown implementation based on script string text blocks
+            let timeLeft = Math.max(3, Math.min(15, Math.ceil(text.length / 25))); 
+            generateBtnText.innerText = `Generating (${timeLeft}s)...`;
+            generateBtn.querySelector('i').className = "fa-solid fa-spinner animate-spin mr-2";
+
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    generateBtnText.innerText = `Generating (${timeLeft}s)...`;
+                } else {
+                    generateBtnText.innerText = `Processing...`;
+                    clearCountdown();
+                }
+            }, 1000);
 
             try {
                 if (currentlyPlayingVoiceId) {
@@ -476,13 +501,16 @@
             } catch (err) {
                 alert("Server Connection Error! Please try again.");
             } finally {
+                clearCountdown();
                 generateBtn.disabled = false;
-                generateBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Generate Voice`;
+                generateBtn.querySelector('i').className = "fa-solid fa-wand-magic-sparkles mr-2";
+                generateBtnText.innerText = `Generate Voice`;
             }
         };
 
         // STOP Generation
         stopBtn.onclick = async function() {
+            clearCountdown();
             try {
                 await fetch('/stop', { method: 'POST' });
             } catch (e) {}
@@ -499,7 +527,8 @@
             }
 
             generateBtn.disabled = false;
-            generateBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Generate Voice`;
+            generateBtn.querySelector('i').className = "fa-solid fa-wand-magic-sparkles mr-2";
+            generateBtnText.innerText = `Generate Voice`;
             
             customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-play text-lg"></i>`;
             playerSeeker.value = 0;
@@ -577,7 +606,7 @@
             terms: {
                 title: "Terms & Conditions",
                 content: `<p class='mb-3'>Welcome to <strong>Fatima TTS</strong>. By accessing our responsive web-based studio platform, deploying our voice synthesis engines, or generating files from our premium dataset, you agree to fulfill the following comprehensive terms, condition rules, and legal system standards unconditionally.</p>
-                          <p class='mb-3'><strong>1. Permissible System Utilization:</strong> Users are granted a non-exclusive license to convert original textual scripts into public audio formats using the interface buttons provided. You agree to use these services safely and in a non-malicious manner. Any systematic attempt to deploy automated scraping routines, background scraping web spiders, or API flooding scripts against our processing networks is strictly prohibited to keep operations highly efficient for everyone.</p>
+                          <p class='mb-3'><strong>1. Permissible System Utilization:</strong> Users are granted a non-exclusive license to convert original textual scripts into public audio formats using the interface buttons provided. You agree to use these services safely and in a non-malicious manner. Any systematic attempt to deploy automated scraping routines, background scraping web spiders, or API flooding scripts against our processing networks is strictly prohibited to maintain premium speeds for everyone.</p>
                           <p class='mb-3'><strong>2. Liability Disclaimers and Operational Status:</strong> The Fatima TTS voice generation engine is provided strictly on an 'as-is' and 'as-available' operational framework. We do not provide express warranties regarding unexpected service execution dropouts, runtime loading dropouts, or momentary latency shifts caused by public cloud hosting providers or underlying service changes.</p>
                           <p><strong>3. Content Ownership:</strong> All audio clips generated through our dashboard belong entirely to the user for unrestricted personal or commercial media use, provided the text content follows legal web safety regulations. Violations of these infrastructure conditions may result in permanent automatic blocking from accessing the website tools.</p>`
             },
