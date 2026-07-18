@@ -14,6 +14,7 @@
         .voice-list-scroll::-webkit-scrollbar-track { background: #0f172a; border-radius: 8px; }
         .voice-list-scroll::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 8px; }
         .voice-list-scroll::-webkit-scrollbar-thumb:hover { background: #374151; }
+        .selected-voice-card { border-color: #a855f7 !important; background-color: rgba(168, 85, 247, 0.1) !important; }
     </style>
 </head>
 <body class="text-gray-200 font-sans min-h-screen flex flex-col items-center p-4">
@@ -38,6 +39,11 @@
             <textarea id="textScript" placeholder="Apni script yahan likhein..." 
                       class="w-full h-32 bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-purple-500 placeholder-gray-600 resize-none transition-all"></textarea>
             
+            <!-- Hidden original select element that your backend architecture uses[span_2](start_span)[span_2](end_span) -->
+            <select id="voiceSelect" class="hidden">
+                <!-- Syncs perfectly with dynamic list cards -->
+            </select>
+
             <!-- Quick View Mode Filter State Selector Tabs -->
             <div class="grid grid-cols-2 gap-2 mt-4">
                 <button id="tabAll" onclick="switchTab('all')" class="btn-purple text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-600/10 transition-all">
@@ -60,7 +66,7 @@
 
         <!-- Dynamic Output Stream Active List Wrapper -->
         <div id="voicesContainer" class="custom-card rounded-2xl p-4 shadow-xl space-y-2 max-h-[40vh] overflow-y-auto voice-list-scroll">
-            <!-- Loaded instantly via array -->
+            <!-- Loaded instantly via original dataset -->
         </div>
     </div>
 
@@ -92,7 +98,7 @@
     </div>
 
     <script>
-        // Restored voice array with explicit per-language default sample text hooks from the zip standard
+        // Original 35 premium voice list dataset from zip layout analysis[span_3](start_span)[span_3](end_span)
         const allVoices = [
             { id: "ur-PK-UzmaNeural", name: "Urdu (PK) - Uzma", lang: "Urdu (Pakistan)", gender: "Female", sample: "فاطمہ سٹوڈیو میں آپ کا خوش آمدید" },
             { id: "ur-PK-AsadNeural", name: "Urdu (PK) - Asad", lang: "Urdu (Pakistan)", gender: "Male", sample: "فاطمہ سٹوڈیو میں آپ کا خوش آمدید" },
@@ -108,7 +114,7 @@
             { id: "ar-SA-AminaNeural", name: "Arabic (SA) - Amina", lang: "Arabic (Saudi)", gender: "Female", sample: "مرحبًا بكم في استوديو فاطمة الصوتي." },
             { id: "ar-SA-HamedNeural", name: "Arabic (SA) - Hamed", lang: "Arabic (Saudi)", gender: "Male", sample: "مرحبًا بكم في استوديو فاطمة الصوتي." },
             { id: "bn-BD-NabanitaNeural", name: "Bengali (BD) - Nabanita", lang: "Bengali (BD)", gender: "Female", sample: "ফাতিমা ভয়েস স্টুডিওতে আপনাকে স্বাগতম।" },
-            { id: "bn-BD-PradeepNeural", name: "Bengali (BD) - Pradeep", lang: "Bengali (BD)", gender: "Male", sample: "ফাতিমা ভয়েস স্টুডিওতে আপনাকে স্বাগতম।" },
+            { id: "bn-BD-PradeepNeural", name: "Bengali (BD) - Pradeep", lang: "Bengali (BD)", gender: "Male", sample: "ফাতিমা ভয়েס স্টুডিওতে আপনাকে স্বাগতম।" },
             { id: "zh-CN-XiaoxiaoNeural", name: "Chinese - Xiaoxiao", lang: "Chinese", gender: "Female", sample: "欢迎来到法蒂玛语音工作室。" },
             { id: "zh-CN-YunxiNeural", name: "Chinese - Yunxi", lang: "Chinese", gender: "Male", sample: "欢迎来到法蒂玛语音工作室。" },
             { id: "fr-FR-DeniseNeural", name: "French (FR) - Denise", lang: "French", gender: "Female", sample: "Bienvenue au studio vocal Fatima." },
@@ -133,6 +139,26 @@
 
         let favorites = JSON.parse(localStorage.getItem('tts_favorites')) || [];
         let currentTab = 'all';
+        let selectedVoiceId = "ur-PK-UzmaNeural"; // Default initialization[span_4](start_span)[span_4](end_span)
+
+        // Populates hidden select dropdown exactly like original zip system requirement[span_5](start_span)[span_5](end_span)
+        function initSelectOptions() {
+            const select = document.getElementById('voiceSelect');
+            select.innerHTML = '';
+            allVoices.forEach(voice => {
+                const opt = document.createElement('option');
+                opt.value = voice.id;
+                opt.innerText = voice.name;
+                select.appendChild(opt);
+            });
+            select.value = selectedVoiceId;
+        }
+
+        function selectVoiceCard(id) {
+            selectedVoiceId = id;
+            document.getElementById('voiceSelect').value = id; // Update hidden standard selector logic[span_6](start_span)[span_6](end_span)
+            renderVoices();
+        }
 
         function renderVoices() {
             const container = document.getElementById('voicesContainer');
@@ -154,20 +180,24 @@
 
             filtered.forEach(voice => {
                 const isFav = favorites.includes(voice.id);
+                const isSelected = voice.id === selectedVoiceId;
                 const item = document.createElement('div');
-                item.className = "flex items-center justify-between bg-slate-950/40 border border-slate-900 rounded-xl p-3.5 hover:border-purple-900/40 transition-all";
                 
+                // Clicking anywhere on card handles selection state updates perfectly[span_7](start_span)[span_7](end_span)
+                item.className = `flex items-center justify-between bg-slate-950/40 border border-slate-900 rounded-xl p-3.5 cursor-pointer transition-all ${isSelected ? 'selected-voice-card' : 'hover:border-purple-900/40'}`;
+                item.setAttribute('onclick', `selectVoiceCard('${voice.id}')`);
+
                 item.innerHTML = `
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
-                            <i class="fa-solid fa-user text-xs text-purple-400"></i>
+                            <i class="fa-solid fa-user text-xs ${isSelected ? 'text-purple-400' : 'text-gray-500'}"></i>
                         </div>
                         <div>
                             <h4 class="text-xs font-bold text-gray-200">${voice.name}</h4>
                             <p class="text-[10px] text-gray-500">[${voice.lang} - ${voice.gender}]</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2" onclick="event.stopPropagation();">
                         <button onclick="playVoice('${voice.id}', this)" class="w-7 h-7 bg-slate-900 border border-slate-800 text-gray-400 hover:text-purple-400 rounded-lg flex items-center justify-center text-xs transition-colors">
                             <i class="fa-solid fa-play"></i>
                         </button>
@@ -181,21 +211,23 @@
         }
 
         async function playVoice(voiceId, btnEl) {
+            // First select the voice item instantly
+            selectVoiceCard(voiceId);
+            
             let script = document.getElementById('textScript').value.trim();
             
-            // Re-analyzed Zip Logic: If user input text fields empty, fall back onto predefined language templates
+            // Zip standard logic: Use default string localized array variables if text block remains blank
             if (!script) {
                 const voiceObj = allVoices.find(v => v.id === voiceId);
                 script = voiceObj ? voiceObj.sample : "Welcome";
             }
 
             const icon = btnEl.querySelector('i');
-            const originalClass = icon.className;
             icon.className = "fa-solid fa-spinner animate-spin text-purple-400";
 
             try {
-                // Exact raw response pipeline matching your Flask deployment configuration
-                const response = await fetch('/api/tts', {
+                // FIXED backend tracking endpoint matching your live Flask app structure precisely[span_8](start_span)[span_8](end_span)
+                const response = await fetch('/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: script, voice: voiceId })
@@ -208,14 +240,14 @@
                     player.src = url;
                     player.play();
                     
-                    player.onended = () => { icon.className = originalClass; };
+                    player.onended = () => { icon.className = "fa-solid fa-play"; };
                 } else {
                     alert("Voice processing workflow failed.");
-                    icon.className = originalClass;
+                    icon.className = "fa-solid fa-play";
                 }
             } catch (err) {
                 alert("Network pipeline execution error.");
-                icon.className = originalClass;
+                icon.className = "fa-solid fa-play";
             }
         }
 
@@ -248,7 +280,7 @@
             renderVoices();
         }
 
-        // AdSense Compliance Core Dynamic Modal Datasets
+        // AdSense Integration Data Array Configuration
         const pageData = {
             about: {
                 title: "About Us",
@@ -282,7 +314,7 @@
         }
 
         window.onload = function() {
-            document.getElementById('voiceCount').innerText = allVoices.length;
+            initSelectOptions();
             renderVoices();
         };
     </script>
