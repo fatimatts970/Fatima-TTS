@@ -60,7 +60,7 @@
 
         <!-- Dynamic Output Stream Active List Wrapper -->
         <div id="voicesContainer" class="custom-card rounded-2xl p-4 shadow-xl space-y-2 max-h-[40vh] overflow-y-auto voice-list-scroll">
-            <!-- Loaded instantly via hardcoded array -->
+            <!-- Loaded instantly via array -->
         </div>
     </div>
 
@@ -91,45 +91,44 @@
         </div>
     </div>
 
-    <!-- Restored Complete Hardcoded Voices & System Logic -->
     <script>
-        // Exact original 35 premium voice list dataset from zip layout analysis[span_2](start_span)[span_2](end_span)
+        // Restored voice array with explicit per-language default sample text hooks from the zip standard
         const allVoices = [
-            { id: "ur-PK-UzmaNeural", name: "Urdu (PK) - Uzma", lang: "Urdu (Pakistan)", gender: "Female" },
-            { id: "ur-PK-AsadNeural", name: "Urdu (PK) - Asad", lang: "Urdu (Pakistan)", gender: "Male" },
-            { id: "ur-IN-GulNeural", name: "Urdu (IN) - Gul", lang: "Urdu (India)", gender: "Female" },
-            { id: "ur-IN-SalmanNeural", name: "Urdu (IN) - Salman", lang: "Urdu (India)", gender: "Male" },
-            { id: "en-US-AriaNeural", name: "English (US) - Aria", lang: "English (US)", gender: "Female" },
-            { id: "en-US-GuyNeural", name: "English (US) - Guy", lang: "English (US)", gender: "Male" },
-            { id: "en-US-JennyNeural", name: "English (US) - Jenny", lang: "English (US)", gender: "Female" },
-            { id: "en-GB-SoniaNeural", name: "English (UK) - Sonia", lang: "English (UK)", gender: "Female" },
-            { id: "en-GB-RyanNeural", name: "English (UK) - Ryan", lang: "English (UK)", gender: "Male" },
-            { id: "hi-IN-SwaraNeural", name: "Hindi (IN) - Swara", lang: "Hindi (India)", gender: "Female" },
-            { id: "hi-IN-MadhurNeural", name: "Hindi (IN) - Madhur", lang: "Hindi (India)", gender: "Male" },
-            { id: "ar-SA-AminaNeural", name: "Arabic (SA) - Amina", lang: "Arabic (Saudi)", gender: "Female" },
-            { id: "ar-SA-HamedNeural", name: "Arabic (SA) - Hamed", lang: "Arabic (Saudi)", gender: "Male" },
-            { id: "bn-BD-NabanitaNeural", name: "Bengali (BD) - Nabanita", lang: "Bengali (BD)", gender: "Female" },
-            { id: "bn-BD-PradeepNeural", name: "Bengali (BD) - Pradeep", lang: "Bengali (BD)", gender: "Male" },
-            { id: "zh-CN-XiaoxiaoNeural", name: "Chinese - Xiaoxiao", lang: "Chinese", gender: "Female" },
-            { id: "zh-CN-YunxiNeural", name: "Chinese - Yunxi", lang: "Chinese", gender: "Male" },
-            { id: "fr-FR-DeniseNeural", name: "French (FR) - Denise", lang: "French", gender: "Female" },
-            { id: "fr-FR-HenriNeural", name: "French (FR) - Henri", lang: "French", gender: "Male" },
-            { id: "de-DE-KatjaNeural", name: "German (DE) - Katja", lang: "German", gender: "Female" },
-            { id: "de-DE-ConradNeural", name: "German (DE) - Conrad", lang: "German", gender: "Male" },
-            { id: "id-ID-GisellaNeural", name: "Indonesian - Gisella", lang: "Indonesian", gender: "Female" },
-            { id: "id-ID-ArdiNeural", name: "Indonesian - Ardi", lang: "Indonesian", gender: "Male" },
-            { id: "it-IT-ElsaNeural", name: "Italian (IT) - Elsa", lang: "Italian", gender: "Female" },
-            { id: "it-IT-DiegoNeural", name: "Italian (IT) - Diego", lang: "Italian", gender: "Male" },
-            { id: "ja-JP-NanamiNeural", name: "Japanese - Nanami", lang: "Japanese", gender: "Female" },
-            { id: "ja-JP-KeitaNeural", name: "Japanese - Keita", lang: "Japanese", gender: "Male" },
-            { id: "ms-MY-YasminNeural", name: "Malay (MY) - Yasmin", lang: "Malay", gender: "Female" },
-            { id: "ms-MY-OsmanNeural", name: "Malay (MY) - Osman", lang: "Malay", gender: "Male" },
-            { id: "pt-BR-FranciscaNeural", name: "Portuguese - Francisca", lang: "Portuguese", gender: "Female" },
-            { id: "pt-BR-AntonioNeural", name: "Portuguese - Antonio", lang: "Portuguese", gender: "Male" },
-            { id: "ru-RU-SvetlanaNeural", name: "Russian - Svetlana", lang: "Russian", gender: "Female" },
-            { id: "ru-RU-DmitryNeural", name: "Russian - Dmitry", lang: "Russian", gender: "Male" },
-            { id: "es-ES-ElviraNeural", name: "Spanish (ES) - Elvira", lang: "Spanish", gender: "Female" },
-            { id: "es-ES-AlvaroNeural", name: "Spanish (ES) - Alvaro", lang: "Spanish", gender: "Male" }
+            { id: "ur-PK-UzmaNeural", name: "Urdu (PK) - Uzma", lang: "Urdu (Pakistan)", gender: "Female", sample: "فاطمہ سٹوڈیو میں آپ کا خوش آمدید" },
+            { id: "ur-PK-AsadNeural", name: "Urdu (PK) - Asad", lang: "Urdu (Pakistan)", gender: "Male", sample: "فاطمہ سٹوڈیو میں آپ کا خوش آمدید" },
+            { id: "ur-IN-GulNeural", name: "Urdu (IN) - Gul", lang: "Urdu (India)", gender: "Female", sample: "فاطمہ سٹوڈیو میں آپ کا خوش آمدید" },
+            { id: "ur-IN-SalmanNeural", name: "Urdu (IN) - Salman", lang: "Urdu (India)", gender: "Male", sample: "فاطمہ سٹوڈیو میں آپ کا خوش آمدید" },
+            { id: "en-US-AriaNeural", name: "English (US) - Aria", lang: "English (US)", gender: "Female", sample: "Welcome to Fatima Premium Voice Studio." },
+            { id: "en-US-GuyNeural", name: "English (US) - Guy", lang: "English (US)", gender: "Male", sample: "Welcome to Fatima Premium Voice Studio." },
+            { id: "en-US-JennyNeural", name: "English (US) - Jenny", lang: "English (US)", gender: "Female", sample: "Welcome to Fatima Premium Voice Studio." },
+            { id: "en-GB-SoniaNeural", name: "English (UK) - Sonia", lang: "English (UK)", gender: "Female", sample: "Welcome to Fatima Premium Voice Studio." },
+            { id: "en-GB-RyanNeural", name: "English (UK) - Ryan", lang: "English (UK)", gender: "Male", sample: "Welcome to Fatima Premium Voice Studio." },
+            { id: "hi-IN-SwaraNeural", name: "Hindi (IN) - Swara", lang: "Hindi (India)", gender: "Female", sample: "फातिमा वॉइस स्टूडियो में आपका स्वागत है।" },
+            { id: "hi-IN-MadhurNeural", name: "Hindi (IN) - Madhur", lang: "Hindi (India)", gender: "Male", sample: "फातिमा वॉइस स्टूडियो में आपका स्वागत है।" },
+            { id: "ar-SA-AminaNeural", name: "Arabic (SA) - Amina", lang: "Arabic (Saudi)", gender: "Female", sample: "مرحبًا بكم في استوديو فاطمة الصوتي." },
+            { id: "ar-SA-HamedNeural", name: "Arabic (SA) - Hamed", lang: "Arabic (Saudi)", gender: "Male", sample: "مرحبًا بكم في استوديو فاطمة الصوتي." },
+            { id: "bn-BD-NabanitaNeural", name: "Bengali (BD) - Nabanita", lang: "Bengali (BD)", gender: "Female", sample: "ফাতিমা ভয়েস স্টুডিওতে আপনাকে স্বাগতম।" },
+            { id: "bn-BD-PradeepNeural", name: "Bengali (BD) - Pradeep", lang: "Bengali (BD)", gender: "Male", sample: "ফাতিমা ভয়েস স্টুডিওতে আপনাকে স্বাগতম।" },
+            { id: "zh-CN-XiaoxiaoNeural", name: "Chinese - Xiaoxiao", lang: "Chinese", gender: "Female", sample: "欢迎来到法蒂玛语音工作室。" },
+            { id: "zh-CN-YunxiNeural", name: "Chinese - Yunxi", lang: "Chinese", gender: "Male", sample: "欢迎来到法蒂玛语音工作室。" },
+            { id: "fr-FR-DeniseNeural", name: "French (FR) - Denise", lang: "French", gender: "Female", sample: "Bienvenue au studio vocal Fatima." },
+            { id: "fr-FR-HenriNeural", name: "French (FR) - Henri", lang: "French", gender: "Male", sample: "Bienvenue au studio vocal Fatima." },
+            { id: "de-DE-KatjaNeural", name: "German (DE) - Katja", lang: "German", gender: "Female", sample: "Willkommen im Fatima Sprachstudio." },
+            { id: "de-DE-ConradNeural", name: "German (DE) - Conrad", lang: "German", gender: "Male", sample: "Willkommen im Fatima Sprachstudio." },
+            { id: "id-ID-GisellaNeural", name: "Indonesian - Gisella", lang: "Indonesian", gender: "Female", sample: "Selamat datang di Studio Suara Fatima." },
+            { id: "id-ID-ArdiNeural", name: "Indonesian - Ardi", lang: "Indonesian", gender: "Male", sample: "Selamat datang di Studio Suara Fatima." },
+            { id: "it-IT-ElsaNeural", name: "Italian (IT) - Elsa", lang: "Italian", gender: "Female", sample: "Benvenuti nello studio vocale Fatima." },
+            { id: "it-IT-DiegoNeural", name: "Italian (IT) - Diego", lang: "Italian", gender: "Male", sample: "Benvenuti nello studio vocale Fatima." },
+            { id: "ja-JP-NanamiNeural", name: "Japanese - Nanami", lang: "Japanese", gender: "Female", sample: "ファティマ音声スタジオへようこそ。" },
+            { id: "ja-JP-KeitaNeural", name: "Japanese - Keita", lang: "Japanese", gender: "Male", sample: "ファティマ音声スタジオへようこそ。" },
+            { id: "ms-MY-YasminNeural", name: "Malay (MY) - Yasmin", lang: "Malay", gender: "Female", sample: "Selamat datang ke Studio Suara Fatima." },
+            { id: "ms-MY-OsmanNeural", name: "Malay (MY) - Osman", lang: "Malay", gender: "Male", sample: "Selamat datang ke Studio Suara Fatima." },
+            { id: "pt-BR-FranciscaNeural", name: "Portuguese - Francisca", lang: "Portuguese", gender: "Female", sample: "Bem-vindo ao estúdio de voz Fatima." },
+            { id: "pt-BR-AntonioNeural", name: "Portuguese - Antonio", lang: "Portuguese", gender: "Male", sample: "Bem-vindo ao estúdio de voz Fatima." },
+            { id: "ru-RU-SvetlanaNeural", name: "Russian - Svetlana", lang: "Russian", gender: "Female", sample: "Добро пожаловать в голосовую студию Фатима." },
+            { id: "ru-RU-DmitryNeural", name: "Russian - Dmitry", lang: "Russian", gender: "Male", sample: "Добро пожаловать в голосовую студию Фатима." },
+            { id: "es-ES-ElviraNeural", name: "Spanish (ES) - Elvira", lang: "Spanish", gender: "Female", sample: "Bienvenido al estudio de voz Fatima." },
+            { id: "es-ES-AlvaroNeural", name: "Spanish (ES) - Alvaro", lang: "Spanish", gender: "Male", sample: "Bienvenido al estudio de voz Fatima." }
         ];
 
         let favorites = JSON.parse(localStorage.getItem('tts_favorites')) || [];
@@ -182,16 +181,20 @@
         }
 
         async function playVoice(voiceId, btnEl) {
-            const script = document.getElementById('textScript').value.trim();
+            let script = document.getElementById('textScript').value.trim();
+            
+            // Re-analyzed Zip Logic: If user input text fields empty, fall back onto predefined language templates
             if (!script) {
-                alert("Please write your script first!");
-                return;
+                const voiceObj = allVoices.find(v => v.id === voiceId);
+                script = voiceObj ? voiceObj.sample : "Welcome";
             }
 
             const icon = btnEl.querySelector('i');
+            const originalClass = icon.className;
             icon.className = "fa-solid fa-spinner animate-spin text-purple-400";
 
             try {
+                // Exact raw response pipeline matching your Flask deployment configuration
                 const response = await fetch('/api/tts', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -205,14 +208,14 @@
                     player.src = url;
                     player.play();
                     
-                    player.onended = () => { icon.className = "fa-solid fa-play"; };
+                    player.onended = () => { icon.className = originalClass; };
                 } else {
                     alert("Voice processing workflow failed.");
-                    icon.className = "fa-solid fa-play";
+                    icon.className = originalClass;
                 }
             } catch (err) {
                 alert("Network pipeline execution error.");
-                icon.className = "fa-solid fa-play";
+                icon.className = originalClass;
             }
         }
 
@@ -245,7 +248,7 @@
             renderVoices();
         }
 
-        // AdSense Dynamic Pages Layout Configuration
+        // AdSense Compliance Core Dynamic Modal Datasets
         const pageData = {
             about: {
                 title: "About Us",
@@ -278,7 +281,6 @@
             if (event.target == m) m.classList.add('hidden');
         }
 
-        // Trigger Instant Initial Load Interface Hook
         window.onload = function() {
             document.getElementById('voiceCount').innerText = allVoices.length;
             renderVoices();
