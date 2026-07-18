@@ -1,541 +1,172 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fatima TTS - Premium Voice Studio</title>
-    <!-- Tailwind CSS & Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons Link -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: radial-gradient(circle at center, #1e1035 0%, #090314 100%);
-            min-height: 100vh;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-        .voice-card {
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .voice-card:hover {
-            transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(168, 85, 247, 0.4);
-        }
-        .voice-card.selected {
-            background: linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(79, 70, 229, 0.2) 100%);
-            border-color: #a855f7;
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
-        }
-        /* Custom Seek Slider Range Styling (Real & Smooth) */
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            height: 6px;
-            outline: none;
-            transition: background 0.3s;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #a855f7;
-            cursor: pointer;
-            box-shadow: 0 0 8px #a855f7;
-            transition: transform 0.1s;
-        }
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.3);
-        }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.02);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(168, 85, 247, 0.3);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(168, 85, 247, 0.5);
-        }
+        body { background-color: #0b0f19; }
+        .custom-card { background-color: #111827; border: 1px solid #1f2937; }
+        .btn-purple { background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); }
     </style>
 </head>
-<body class="text-gray-100 flex items-center justify-center p-4 md:p-8">
+<body class="text-gray-200 font-sans min-h-screen flex flex-col items-center p-4">
 
-    <div class="w-full max-w-lg glass-card p-6 md:p-8 relative overflow-hidden">
-        <!-- Background Glows -->
-        <div class="absolute -top-24 -left-24 w-48 h-48 bg-purple-600 rounded-full blur-[80px] opacity-30"></div>
-        <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-600 rounded-full blur-[80px] opacity-30"></div>
+    <!-- Top Navigation Brand Bar -->
+    <div class="w-full max-w-md flex flex-col items-center justify-center mb-6 pt-4 text-center">
+        <div class="w-14 h-14 rounded-2xl btn-purple flex items-center justify-center shadow-lg shadow-purple-500/30 mb-3">
+            <span class="text-white text-2xl font-black">F</span>
+        </div>
+        <h1 class="text-2xl font-black tracking-wider text-white">Fatima TTS</h1>
+        <p class="text-xs uppercase tracking-widest text-purple-400 font-bold mt-1">Premium Voice Studio</p>
+        <div class="mt-3 bg-slate-900/80 border border-slate-800 rounded-full px-4 py-1 flex items-center gap-2 text-[11px] text-amber-400 font-medium">
+            <i class="fa-solid fa-bolt text-xs"></i> Total 35 Premium Global Voices Active Hain!
+        </div>
+    </div>
 
-        <!-- Logo & Header -->
-        <div class="text-center mb-6 relative z-10">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-blue-500 shadow-lg shadow-purple-500/30 mb-3">
-                <span class="text-3xl font-extrabold text-white tracking-wider">F</span>
-            </div>
-            <h1 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">Fatima TTS</h1>
-            <p class="text-xs uppercase tracking-widest text-gray-400 font-semibold mt-1">Premium Voice Studio</p>
+    <!-- Main Dynamic Application Container -->
+    <div class="w-full max-w-md space-y-4">
+        
+        <!-- Input Script Configuration Panel -->
+        <div class="custom-card rounded-2xl p-5 shadow-xl">
+            <textarea id="textScript" placeholder="Apni script yahan likhein..." 
+                      class="w-full h-32 bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-purple-500 placeholder-gray-600 resize-none transition-all"></textarea>
             
-            <!-- Yellow Color Counter Line -->
-            <p class="text-sm text-yellow-400 font-medium tracking-wide mt-3">
-                <i class="fa-solid fa-bolt mr-1 animate-pulse"></i> Total 35 Premium Global Voices Active Hain!
-            </p>
-        </div>
-
-        <!-- Text Area -->
-        <div class="mb-6 relative z-10">
-            <textarea id="scriptText" placeholder="Apni script yahan likhein..." 
-                class="w-full h-32 px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-purple-500 text-gray-100 placeholder-gray-500 resize-none transition duration-300 text-right" dir="auto"></textarea>
-        </div>
-
-        <!-- Tabs -->
-        <div class="flex space-x-2 bg-white/5 p-1 rounded-xl mb-4 relative z-10">
-            <button id="allVoicesTab" class="flex-1 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow">
-                <i class="fa-solid fa-microphone-lines mr-1.5"></i> All Voices
-            </button>
-            <button id="favoritesTab" class="flex-1 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white transition">
-                <i class="fa-solid fa-star mr-1.5 text-yellow-500"></i> Favorites
-            </button>
-        </div>
-
-        <!-- Search Bar -->
-        <div class="mb-4 relative z-10">
-            <input type="text" id="searchVoices" placeholder="Search language or voice..." 
-                class="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-purple-500 text-sm text-gray-200 placeholder-gray-500 transition duration-300">
-        </div>
-
-        <!-- Voices List Container -->
-        <div class="h-64 overflow-y-auto space-y-2 mb-6 pr-1 relative z-10" id="voicesContainer">
-            <!-- Voice Cards dynamically injected here -->
-        </div>
-
-        <!-- Action Button Panel (Generate & Stop) -->
-        <div class="flex space-x-3 mb-6 relative z-10">
-            <button id="generateBtn" class="flex-2 w-3/4 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-purple-600/20 transition duration-300 flex items-center justify-center">
-                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
-                <span>Generate Voice</span>
-            </button>
-            <button id="stopBtn" class="flex-1 w-1/4 py-4 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 text-red-400 font-semibold rounded-xl transition duration-300 flex items-center justify-center">
-                Stop
-            </button>
-        </div>
-
-        <!-- Custom Luxury Audio Player Box with Real Timer & Download Button -->
-        <div id="audioPlayerContainer" class="p-4 bg-gradient-to-r from-purple-950/40 to-indigo-950/40 rounded-2xl border border-white/10 hidden relative z-10 shadow-inner">
-            <div class="flex items-center space-x-4">
-                <!-- Play/Pause Button -->
-                <button id="customPlayPauseBtn" class="w-12 h-12 rounded-xl bg-purple-600 hover:bg-purple-500 flex items-center justify-center text-white shadow-md transition duration-200">
-                    <i class="fa-solid fa-play text-lg"></i>
+            <!-- Quick View Mode Filter State Selector Tabs -->
+            <div class="grid grid-cols-2 gap-2 mt-4">
+                <button class="btn-purple text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-600/10">
+                    <i class="fa-solid fa-microphone text-xs"></i> All Voices
                 </button>
-                
-                <!-- Progress & Details -->
-                <div class="flex-1 flex flex-col justify-center">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-xs text-gray-400 font-semibold tracking-wider uppercase">Voice Output</span>
-                        <span id="playerTime" class="text-xs text-gray-400 font-medium">0:00 / 0:00</span>
+                <button class="bg-slate-950 border border-slate-800 text-gray-400 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 hover:text-gray-200 transition-colors">
+                    <i class="fa-solid fa-star text-xs text-amber-500"></i> Favorites
+                </button>
+            </div>
+
+            <!-- Search Pipeline Filtration -->
+            <div class="relative mt-3">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-600">
+                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </span>
+                <input type="text" id="searchVoice" placeholder="Search language or voice..." 
+                       class="w-full bg-slate-950/80 border border-slate-800 rounded-xl py-2.5 pl-9 pr-4 text-xs text-white focus:outline-none focus:border-purple-500 placeholder-gray-600 transition-all">
+            </div>
+        </div>
+
+        <!-- Dynamic Output Stream Active List Wrapper -->
+        <div class="custom-card rounded-2xl p-4 shadow-xl space-y-2 max-h-[40vh] overflow-y-auto">
+            
+            <!-- Voice Track Item 1 -->
+            <div class="flex items-center justify-between bg-slate-950/40 border border-slate-900 rounded-xl p-3.5 hover:border-purple-900/40 transition-all">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
+                        <i class="fa-solid fa-user text-xs text-purple-400"></i>
                     </div>
-                    <!-- Real Timer Progress Line (—•—) -->
-                    <input type="range" id="playerSeeker" value="0" min="0" max="100" class="w-full">
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-200">Urdu (PK) - Uzma</h4>
+                        <p class="text-[10px] text-gray-500">[Female]</p>
+                    </div>
                 </div>
+                <div class="flex items-center gap-2">
+                    <button class="w-7 h-7 bg-slate-900 border border-slate-800 text-gray-400 hover:text-purple-400 rounded-lg flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-play"></i></button>
+                    <button class="w-7 h-7 bg-slate-900 border border-slate-800 text-gray-500 hover:text-amber-500 rounded-lg flex items-center justify-center text-xs transition-colors"><i class="fa-regular fa-star"></i></button>
+                </div>
+            </div>
 
-                <!-- Action Buttons: Download Button -->
-                <button id="downloadBtn" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-purple-600/20 border border-white/10 flex items-center justify-center text-gray-300 hover:text-white transition duration-200 shadow-md">
-                    <i class="fa-solid fa-download text-base"></i>
-                </button>
+            <!-- Voice Track Item 2 -->
+            <div class="flex items-center justify-between bg-slate-950/40 border border-slate-900 rounded-xl p-3.5 hover:border-purple-900/40 transition-all">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
+                        <i class="fa-solid fa-user text-xs text-purple-400"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-200">Urdu (PK) - Asad</h4>
+                        <p class="text-[10px] text-gray-500">[Male]</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="w-7 h-7 bg-slate-900 border border-slate-800 text-gray-400 hover:text-purple-400 rounded-lg flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-play"></i></button>
+                    <button class="w-7 h-7 bg-slate-900 border border-slate-800 text-gray-500 hover:text-amber-500 rounded-lg flex items-center justify-center text-xs transition-colors"><i class="fa-regular fa-star"></i></button>
+                </div>
+            </div>
+
+            <!-- Voice Track Item 3 -->
+            <div class="flex items-center justify-between bg-slate-950/40 border border-slate-900 rounded-xl p-3.5 hover:border-purple-900/40 transition-all">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
+                        <i class="fa-solid fa-user text-xs text-purple-400"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-200">Urdu (IN) - Gul</h4>
+                        <p class="text-[10px] text-gray-500">[Female]</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="w-7 h-7 bg-slate-900 border border-slate-800 text-gray-400 hover:text-purple-400 rounded-lg flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-play"></i></button>
+                    <button class="w-7 h-7 bg-slate-900 border border-slate-800 text-gray-500 hover:text-amber-500 rounded-lg flex items-center justify-center text-xs transition-colors"><i class="fa-regular fa-star"></i></button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= PREMIUM ADSENSE PAGES SECTION ================= -->
+    <footer class="w-full max-w-md text-center py-6 mt-8 border-t border-slate-800/60 text-xs text-gray-500 space-x-3">
+        <button onclick="openPolicy('about')" class="hover:text-purple-400 transition-colors">About Us</button>
+        <span>•</span>
+        <button onclick="openPolicy('privacy')" class="hover:text-purple-400 transition-colors">Privacy Policy</button>
+        <span>•</span>
+        <button onclick="openPolicy('terms')" class="hover:text-purple-400 transition-colors">Terms & Conditions</button>
+        <span>•</span>
+        <button onclick="openPolicy('contact')" class="hover:text-purple-400 transition-colors">Contact Us</button>
+    </footer>
+
+    <!-- Dynamic Modal System (No Redirection, 0% Routing Error) -->
+    <div id="policyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl max-h-[80vh] flex flex-col shadow-2xl">
+            <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+                <h3 id="modalTitle" class="text-sm font-bold text-white uppercase tracking-wider"></h3>
+                <button onclick="closePolicy()" class="text-gray-400 hover:text-white text-lg font-bold">&times;</button>
+            </div>
+            <div id="modalContent" class="p-5 overflow-y-auto text-xs text-gray-400 space-y-3 leading-relaxed">
+                <!-- Text contents inject dynamic here -->
             </div>
         </div>
     </div>
 
-    <!-- Hidden Background Audio Players -->
-    <audio id="audioPlayer" style="display: none;"></audio>
-    <audio id="silentPreviewPlayer" style="display: none;"></audio>
-
-    <!-- Script Section -->
     <script>
-        const voices = [
-            // Urdu (Pakistan & India)
-            { id: "ur-PK-UzmaNeural", name: "Urdu (PK) - Uzma [Female]", lang: "ur" },
-            { id: "ur-PK-AsadNeural", name: "Urdu (PK) - Asad [Male]", lang: "ur" },
-            { id: "ur-IN-GulNeural", name: "Urdu (IN) - Gul [Female]", lang: "ur" },
-            { id: "ur-IN-SalmanNeural", name: "Urdu (IN) - Salman [Male]", lang: "ur" },
-            
-            // Hindi (India)
-            { id: "hi-IN-SwaraNeural", name: "Hindi (IN) - Swara [Female]", lang: "hi" },
-            { id: "hi-IN-MadhurNeural", name: "Hindi (IN) - Madhur [Male]", lang: "hi" },
-
-            // English (US)
-            { id: "en-US-SteffanNeural", name: "English (US) - Steffan [Male - Premium]", lang: "en" },
-            { id: "en-US-AriaNeural", name: "English (US) - Aria [Female]", lang: "en" },
-            { id: "en-US-GuyNeural", name: "English (US) - Guy [Male]", lang: "en" },
-            { id: "en-US-EmmaNeural", name: "English (US) - Emma [Female - Soft]", lang: "en" },
-            { id: "en-US-AndrewNeural", name: "English (US) - Andrew [Male]", lang: "en" },
-            { id: "en-US-AvaNeural", name: "English (US) - Ava [Female]", lang: "en" },
-            { id: "en-US-BrianNeural", name: "English (US) - Brian [Male]", lang: "en" },
-
-            // English (UK / Australia / India)
-            { id: "en-GB-SoniaNeural", name: "English (UK) - Sonia [Female]", lang: "en" },
-            { id: "en-GB-RyanNeural", name: "English (UK) - Ryan [Male]", lang: "en" },
-            { id: "en-GB-LibbyNeural", name: "English (UK) - Libby [Female]", lang: "en" },
-            { id: "en-AU-NatashaNeural", name: "English (AUS) - Natasha [Female]", lang: "en" },
-            { id: "en-AU-WilliamNeural", name: "English (AUS) - William [Male]", lang: "en" },
-            { id: "en-IN-NeerjaNeural", name: "English (IND) - Neerja [Female]", lang: "en" },
-            { id: "en-IN-PrabhatNeural", name: "English (IND) - Prabhat [Male]", lang: "en" },
-
-            // Arabic
-            { id: "ar-SA-ZariyahNeural", name: "Arabic (SA) - Zariyah [Female]", lang: "ar" },
-            { id: "ar-SA-HamedNeural", name: "Arabic (SA) - Hamed [Male]", lang: "ar" },
-            { id: "ar-EG-SalmaNeural", name: "Arabic (EG) - Salma [Female]", lang: "ar" },
-            { id: "ar-AE-FatimaNeural", name: "Arabic (UAE) - Fatima [Female]", lang: "ar" },
-            { id: "ar-AE-HamdanNeural", name: "Arabic (UAE) - Hamdan [Male]", lang: "ar" },
-
-            // Spanish
-            { id: "es-ES-ElviraNeural", name: "Spanish (ES) - Elvira [Female]", lang: "es" },
-            { id: "es-ES-AlvaroNeural", name: "Spanish (ES) - Alvaro [Male]", lang: "es" },
-            { id: "es-MX-DaliaNeural", name: "Spanish (MX) - Dalia [Female]", lang: "es" },
-            { id: "es-MX-JorgeNeural", name: "Spanish (MX) - Jorge [Male]", lang: "es" },
-
-            // French
-            { id: "fr-FR-DeniseNeural", name: "French (FR) - Denise [Female]", lang: "fr" },
-            { id: "fr-FR-HenriNeural", name: "French (FR) - Henri [Male]", lang: "fr" },
-
-            // German
-            { id: "de-DE-KatjaNeural", name: "German (DE) - Katja [Female]", lang: "de" },
-            { id: "de-DE-ConradNeural", name: "German (DE) - Conrad [Male]", lang: "de" },
-
-            // Turkish
-            { id: "tr-TR-EmelNeural", name: "Turkish (TR) - Emel [Female]", lang: "tr" },
-            { id: "tr-TR-AhmetNeural", name: "Turkish (TR) - Ahmet [Male]", lang: "tr" },
-
-            // Persian
-            { id: "fa-IR-DilaraNeural", name: "Persian (IR) - Dilara [Female]", lang: "fa" },
-            { id: "fa-IR-FaridNeural", name: "Persian (IR) - Farid [Male]", lang: "fa" },
-
-            // Afrikaans
-            { id: "af-ZA-AdriNeural", name: "Afrikaans (ZA) - Adri [Female]", lang: "af" },
-            { id: "af-ZA-WillemNeural", name: "Afrikaans (ZA) - Willem [Male]", lang: "af" },
-
-            // Hebrew
-            { id: "he-IL-HilaNeural", name: "Hebrew (IL) - Hila [Female]", lang: "he" },
-            { id: "he-IL-AvriNeural", name: "Hebrew (IL) - Avri [Male]", lang: "he" }
-        ];
-
-        let selectedVoice = "ur-PK-UzmaNeural";
-        let favorites = JSON.parse(localStorage.getItem('tts_favorites')) || [];
-        let currentlyPlayingVoiceId = null;
-        let generatedFileName = ""; // Globally store unique filename
-
-        const voicesContainer = document.getElementById('voicesContainer');
-        const generateBtn = document.getElementById('generateBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const scriptText = document.getElementById('scriptText');
-        const searchInput = document.getElementById('searchVoices');
-        const audioPlayerContainer = document.getElementById('audioPlayerContainer');
-        const audioPlayer = document.getElementById('audioPlayer');
-        const silentPreviewPlayer = document.getElementById('silentPreviewPlayer');
-        const downloadBtn = document.getElementById('downloadBtn');
-        
-        // Custom Player Elements
-        const customPlayPauseBtn = document.getElementById('customPlayPauseBtn');
-        const playerSeeker = document.getElementById('playerSeeker');
-        const playerTime = document.getElementById('playerTime');
-
-        // Render Voice Cards
-        function renderVoices(filterFavorites = false, query = "") {
-            voicesContainer.innerHTML = '';
-            let listToRender = filterFavorites ? voices.filter(v => favorites.includes(v.id)) : voices;
-
-            if (query.trim() !== "") {
-                listToRender = listToRender.filter(v => 
-                    v.name.toLowerCase().includes(query.toLowerCase()) || 
-                    v.id.toLowerCase().includes(query.toLowerCase())
-                );
+        const pageData = {
+            about: {
+                title: "About Us",
+                content: "<p>Welcome to <strong>Fatima TTS</strong>, a premium, high-performance Text-to-Speech studio utility tool designed to convert your scripts into crystal-clear realistic voiceovers instantly.</p><p>We specialize in processing natural language workflows using cutting-edge dynamic media rendering models to deliver fast, seamless speech generation features worldwide.</p>"
+            },
+            privacy: {
+                title: "Privacy Policy",
+                content: "<p>At Fatima TTS, we prioritize user data protection. We do not store, retain, or save any script data or user input on our server pipelines.</p><p>All generated dynamic audio outputs are streamed instantly and temporarily processed. We do not use persistent tracking cookies, ensuring a secure environment for all content creation processes.</p>"
+            },
+            terms: {
+                title: "Terms & Conditions",
+                content: "<p>By utilizing the tools provided on Fatima TTS, you agree to access our services in a fair and non-malicious manner. Our platform is provided 'as-is' without liability for network level execution dropouts.</p><p>Automated scraping or spamming of the voice generation application programming interfaces is strictly prohibited to maintain premium speeds for everyone.</p>"
+            },
+            contact: {
+                title: "Contact Us",
+                content: "<p>Have questions, business inquiries, or technical feedback regarding Fatima TTS? Reach out directly via our official channel infrastructure.</p><p><strong>Email support:</strong> contact.fatimatts@gmail.com</p><p>We value user input and aim to respond within 24 to 48 standard tracking hours.</p>"
             }
+        };
 
-            if (listToRender.length === 0) {
-                voicesContainer.innerHTML = `<div class="text-center text-gray-500 py-10 text-sm">No voices found.</div>`;
-                return;
-            }
-
-            listToRender.forEach(voice => {
-                const isSelected = voice.id === selectedVoice;
-                const isFav = favorites.includes(voice.id);
-                const isPlayingThis = voice.id === currentlyPlayingVoiceId;
-
-                const card = document.createElement('div');
-                card.className = `voice-card p-3 rounded-xl flex items-center justify-between cursor-pointer ${isSelected ? 'selected' : 'bg-white/5'}`;
-                card.onclick = () => selectVoice(voice.id);
-
-                const isMale = voice.id.includes('Male') || voice.id.includes('Salman') || voice.id.includes('Madhur') || voice.id.includes('Karan') || voice.id.includes('Guy') || voice.id.includes('Ryan') || voice.id.includes('Hamed') || voice.id.includes('Jorge') || voice.id.includes('Willem') || voice.id.includes('Avri') || voice.id.includes('Steffan') || voice.id.includes('Andrew') || voice.id.includes('Brian') || voice.id.includes('William') || voice.id.includes('Prabhat') || voice.id.includes('Hamdan') || voice.id.includes('Alvaro') || voice.id.includes('Henri') || voice.id.includes('Conrad') || voice.id.includes('Ahmet') || voice.id.includes('Farid');
-
-                card.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-                            <i class="fa-solid ${isMale ? 'fa-user-tie' : 'fa-user'}"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs font-medium text-white">${voice.name}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <button id="playBtn-${voice.id}" onclick="event.stopPropagation(); testVoice('${voice.id}')" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-purple-600/30 text-gray-400 hover:text-white flex items-center justify-center transition">
-                            <i class="fa-solid ${isPlayingThis ? 'fa-pause text-purple-400' : 'fa-play text-xs'}"></i>
-                        </button>
-                        <button onclick="event.stopPropagation(); toggleFavorite('${voice.id}')" class="w-7 h-7 rounded-lg bg-white/5 text-gray-400 hover:text-yellow-500 flex items-center justify-center transition">
-                            <i class="fa-${isFav ? 'solid' : 'regular'} fa-star ${isFav ? 'text-yellow-500' : ''} text-xs"></i>
-                        </button>
-                    </div>
-                `;
-                voicesContainer.appendChild(card);
-            });
+        function openPolicy(key) {
+            document.getElementById('modalTitle').innerText = pageData[key].title;
+            document.getElementById('modalContent').innerHTML = pageData[key].content;
+            document.getElementById('policyModal').classList.remove('hidden');
         }
-
-        function selectVoice(id) {
-            selectedVoice = id;
-            const currentTab = document.getElementById('favoritesTab').classList.contains('text-white');
-            renderVoices(currentTab, searchInput.value);
+        function closePolicy() {
+            document.getElementById('policyModal').classList.add('hidden');
         }
-
-        function toggleFavorite(id) {
-            if (favorites.includes(id)) {
-                favorites = favorites.filter(favId => favId !== id);
-            } else {
-                favorites.push(id);
-            }
-            localStorage.setItem('tts_favorites', JSON.stringify(favorites));
-            const currentTab = document.getElementById('favoritesTab').classList.contains('text-white');
-            renderVoices(currentTab, searchInput.value);
+        window.onclick = function(event) {
+            let m = document.getElementById('policyModal');
+            if (event.target == m) m.classList.add('hidden');
         }
-
-        searchInput.oninput = function() {
-            const currentTab = document.getElementById('favoritesTab').classList.contains('text-white');
-            renderVoices(currentTab, this.value);
-        };
-
-        // Preview sound test
-        async function testVoice(voiceId) {
-            const playIconBtn = document.querySelector(`#playBtn-${voiceId} i`);
-
-            if (currentlyPlayingVoiceId === voiceId) {
-                silentPreviewPlayer.pause();
-                currentlyPlayingVoiceId = null;
-                if (playIconBtn) {
-                    playIconBtn.className = 'fa-solid fa-play text-xs';
-                }
-                return;
-            }
-
-            if (currentlyPlayingVoiceId) {
-                const prevPlayIconBtn = document.querySelector(`#playBtn-${currentlyPlayingVoiceId} i`);
-                if (prevPlayIconBtn) prevPlayIconBtn.className = 'fa-solid fa-play text-xs';
-            }
-
-            try {
-                if (playIconBtn) {
-                    playIconBtn.className = 'fa-solid fa-spinner animate-spin text-xs';
-                }
-
-                const response = await fetch('/preview', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ voice: voiceId })
-                });
-                const data = await response.json();
-                
-                if (data.success) {
-                    currentlyPlayingVoiceId = voiceId;
-                    silentPreviewPlayer.src = data.audio_url;
-                    
-                    if (playIconBtn) {
-                        playIconBtn.className = 'fa-solid fa-pause text-purple-400';
-                    }
-                    silentPreviewPlayer.play();
-                } else {
-                    alert("Preview failed: " + data.error);
-                    if (playIconBtn) playIconBtn.className = 'fa-solid fa-play text-xs';
-                }
-            } catch (err) {
-                alert("Connection error! Please try again.");
-                if (playIconBtn) playIconBtn.className = 'fa-solid fa-play text-xs';
-            }
-        }
-
-        // Silent player listeners
-        silentPreviewPlayer.onended = function() {
-            if (currentlyPlayingVoiceId) {
-                const playIconBtn = document.querySelector(`#playBtn-${currentlyPlayingVoiceId} i`);
-                if (playIconBtn) {
-                    playIconBtn.className = 'fa-solid fa-play text-xs';
-                }
-                currentlyPlayingVoiceId = null;
-            }
-        };
-
-        silentPreviewPlayer.onpause = function() {
-            if (currentlyPlayingVoiceId) {
-                const playIconBtn = document.querySelector(`#playBtn-${currentlyPlayingVoiceId} i`);
-                if (playIconBtn) {
-                    playIconBtn.className = 'fa-solid fa-play text-xs';
-                }
-                currentlyPlayingVoiceId = null;
-            }
-        };
-
-        // Tabs Toggle
-        document.getElementById('allVoicesTab').onclick = function() {
-            this.className = "flex-1 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow";
-            document.getElementById('favoritesTab').className = "flex-1 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white transition";
-            renderVoices(false, searchInput.value);
-        };
-
-        document.getElementById('favoritesTab').onclick = function() {
-            this.className = "flex-1 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow";
-            document.getElementById('allVoicesTab').className = "flex-1 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white transition";
-            renderVoices(true, searchInput.value);
-        };
-
-        // Main Voice Generation Action (Unique file mapping)
-        generateBtn.onclick = async function() {
-            const text = scriptText.value.trim();
-            if (!text) {
-                alert("Pehle koi script likhein!");
-                return;
-            }
-
-            generateBtn.disabled = true;
-            generateBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-2"></i> Generating...`;
-
-            try {
-                if (currentlyPlayingVoiceId) {
-                    silentPreviewPlayer.pause();
-                }
-
-                const response = await fetch('/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: text, voice: selectedVoice })
-                });
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Update global file name variable with randomized server-side filename
-                    generatedFileName = data.filename;
-                    
-                    audioPlayer.src = data.audio_url;
-                    audioPlayer.load();
-                    
-                    audioPlayer.onloadedmetadata = function() {
-                        audioPlayerContainer.classList.remove('hidden');
-                        playerSeeker.max = Math.floor(audioPlayer.duration);
-                        playerTime.innerText = `0:00 / ${formatTime(audioPlayer.duration)}`;
-                        audioPlayer.play();
-                        customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-pause text-lg"></i>`;
-                    };
-                } else {
-                    alert("Generation failed: " + data.error);
-                }
-            } catch (err) {
-                alert("Server Connection Error! Please try again.");
-            } finally {
-                generateBtn.disabled = false;
-                generateBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Generate Voice`;
-            }
-        };
-
-        // STOP Generation
-        stopBtn.onclick = async function() {
-            try {
-                await fetch('/stop', { method: 'POST' });
-            } catch (e) {}
-
-            audioPlayer.pause();
-            audioPlayer.currentTime = 0;
-            silentPreviewPlayer.pause();
-            silentPreviewPlayer.currentTime = 0;
-
-            if (currentlyPlayingVoiceId) {
-                const playIconBtn = document.querySelector(`#playBtn-${currentlyPlayingVoiceId} i`);
-                if (playIconBtn) playIconBtn.className = 'fa-solid fa-play text-xs';
-                currentlyPlayingVoiceId = null;
-            }
-
-            generateBtn.disabled = false;
-            generateBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Generate Voice`;
-            
-            customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-play text-lg"></i>`;
-            playerSeeker.value = 0;
-            playerTime.innerText = "0:00 / 0:00";
-        };
-
-        // CUSTOM PLAYER INTERFACE LOGIC
-        customPlayPauseBtn.onclick = function() {
-            if (audioPlayer.paused) {
-                audioPlayer.play();
-                customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-pause text-lg"></i>`;
-            } else {
-                audioPlayer.pause();
-                customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-play text-lg"></i>`;
-            }
-        };
-
-        // Real-time Smooth Progress Line Update
-        audioPlayer.ontimeupdate = function() {
-            if (audioPlayer.duration) {
-                playerSeeker.value = Math.floor(audioPlayer.currentTime);
-                playerTime.innerText = `${formatTime(audioPlayer.currentTime)} / ${formatTime(audioPlayer.duration)}`;
-            }
-        };
-
-        // Drag/Click seeker bar
-        playerSeeker.oninput = function() {
-            audioPlayer.currentTime = playerSeeker.value;
-        };
-
-        // Reset player UI state when audio ends
-        audioPlayer.onended = function() {
-            customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-play text-lg"></i>`;
-            playerSeeker.value = 0;
-        };
-
-        // Dynamic Randomized File Download Action
-        downloadBtn.onclick = function() {
-            if (audioPlayer.src && generatedFileName) {
-                const link = document.createElement('a');
-                link.href = audioPlayer.src;
-                // Seed custom randomized filename into the browser native download process
-                link.download = generatedFileName;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } else {
-                alert("Pehle koi voice generate karein!");
-            }
-        };
-
-        // Helper time formatter
-        function formatTime(secs) {
-            if (isNaN(secs)) return "0:00";
-            const minutes = Math.floor(secs / 60);
-            const seconds = Math.floor(secs % 60);
-            return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-        }
-
-        renderVoices();
     </script>
 </body>
 </html>
