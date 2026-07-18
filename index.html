@@ -71,12 +71,12 @@
 </head>
 <body class="text-white flex flex-col items-center p-4 md:p-8">
 
-    <!-- ================= MAIN APP STUDIO VIEW ================= -->
+    <!-- ================= MAIN DASHBOARD VIEW ================= -->
     <div id="mainStudioAppView" class="w-full flex flex-col items-center">
-        <!-- Top Navigation Brand Bar -->
+        <!-- Header Section -->
         <header class="w-full max-w-lg flex items-center justify-between mb-8 px-2 relative z-10">
             <a href="/" class="flex items-center space-x-2 group">
-                <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-md shadow-black/10">
+                <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-md">
                     <i class="fa-solid fa-microphone-lines text-[#155dfc] text-lg"></i>
                 </div>
                 <div class="flex flex-col">
@@ -90,9 +90,9 @@
             </div>
         </header>
 
-        <!-- Main Studio Dashboard Panel Box -->
+        <!-- Studio Control Container -->
         <div class="w-full max-w-lg glass-card p-6 md:p-8 relative overflow-hidden mb-8">
-            <div class="text-center mb-6 w-full overflow-hidden">
+            <div class="text-center mb-6 w-full">
                 <h1 class="text-lg md:text-xl font-bold tracking-tight text-white block w-full truncate text-center">
                     Fatima Text To Speech Studio
                 </h1>
@@ -101,7 +101,7 @@
                 </p>
             </div>
 
-            <!-- Text Area Input Console (Left-Aligned Layout Fix) -->
+            <!-- Script Input Space (Left-aligned text box) -->
             <div class="mb-6 relative z-10">
                 <div class="relative">
                     <textarea id="scriptText" placeholder="Enter your text script here..." 
@@ -112,7 +112,7 @@
                 </div>
             </div>
 
-            <!-- Voices Listing Configuration Section -->
+            <!-- Tab Toggles -->
             <div class="flex space-x-2 bg-black/20 p-1 rounded-xl mb-4 relative z-10">
                 <button id="allVoicesTab" class="flex-1 py-2 text-sm font-medium rounded-lg bg-white text-[#155dfc] shadow-md font-bold" onclick="switchFilterTab('all')">
                     <i class="fa-solid fa-microphone-lines mr-1.5"></i> All Voices
@@ -122,15 +122,18 @@
                 </button>
             </div>
 
+            <!-- Voice Finder Field -->
             <div class="mb-4 relative z-10">
                 <input type="text" id="searchVoices" placeholder="Search language or voice..." 
                     class="w-full px-4 py-2 bg-black/20 border border-white/20 rounded-xl focus:outline-none focus:border-white text-sm text-white placeholder-white/40 transition duration-300">
             </div>
 
+            <!-- Voices Grid Container -->
             <div class="h-64 overflow-y-auto space-y-2 mb-6 pr-1 relative z-10" id="voicesContainer">
-                <!-- Dynamically loaded cards -->
+                <!-- Populated dynamically via script -->
             </div>
 
+            <!-- Operations Execution Control Panel -->
             <div class="flex space-x-3 mb-6 relative z-10">
                 <button id="generateBtn" class="flex-2 w-3/4 py-4 bg-white hover:bg-white/90 text-[#155dfc] font-bold rounded-xl shadow-lg transition duration-300 flex items-center justify-center">
                     <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
@@ -141,7 +144,7 @@
                 </button>
             </div>
 
-            <!-- Custom Luxury Audio Player Component -->
+            <!-- Audio Player View Configuration -->
             <div id="audioPlayerContainer" class="p-4 bg-black/20 rounded-2xl border border-white/20 hidden relative z-10 shadow-inner">
                 <div class="flex items-center space-x-4">
                     <button id="customPlayPauseBtn" class="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-[#155dfc] shadow-md transition duration-200 hover:scale-105">
@@ -198,7 +201,7 @@
                 </p>
             </section>
 
-            <!-- FAQ Section -->
+            <!-- FAQ Section Accordion Component -->
             <section class="border-t border-slate-100 pt-5">
                 <h3 class="text-lg font-bold text-slate-900 mb-4">Frequently Asked Questions (FAQs)</h3>
                 <div class="space-y-2">
@@ -225,7 +228,7 @@
         </div>
     </div>
 
-    <!-- ================= DYNAMIC 100% MOBILE COMPLIANT SUB-PAGE VIEW ================= -->
+    <!-- ================= 100% RESPONSIVE MOBILE TARGET SUB-PAGE VIEW ================= -->
     <div id="subPagePolicyView" class="w-full flex flex-col items-center hidden">
         <header class="w-full max-w-lg flex items-center justify-between mb-6 px-2 relative z-10">
             <button onclick="closeSubRoutePage()" class="flex items-center space-x-2 bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-xs font-bold hover:bg-white/20 transition">
@@ -240,41 +243,37 @@
         <div class="w-full max-w-lg bg-white text-slate-800 rounded-3xl p-6 md:p-8 shadow-xl mb-8">
             <h1 id="subPageTitle" class="text-2xl font-black text-slate-950 mb-4 border-b border-slate-100 pb-3 uppercase tracking-wide"></h1>
             <div id="subPageContent" class="text-xs md:text-sm text-slate-600 space-y-4 leading-relaxed">
-                <!-- Text contents loaded dynamically -->
+                <!-- Text contents loaded dynamically via safe system cache array -->
             </div>
         </div>
     </div>
 
-    <!-- ================= ADSENSE PREMIUM COMPLIANT FOOTER LINKS ================= -->
+    <!-- ================= ADSENSE COMPLIANT MAPPED FOOTER LINKS ================= -->
     <footer class="w-full max-w-lg text-center py-6 border-t border-white/20 text-xs text-white/60 space-x-3 relative z-10">
-        <a href="/about" onclick="hijackRouteForNewTab(event, 'about')" class="hover:text-white transition-colors">About Us</a>
+        <!-- Secure Multi-Tab Verification Engine mapped to direct dynamic paths -->
+        <a href="/about" onclick="openPolicyViewInTab(event, 'about')" class="hover:text-white transition-colors">About Us</a>
         <span>•</span>
-        <a href="/privacy" onclick="hijackRouteForNewTab(event, 'privacy')" class="hover:text-white transition-colors">Privacy Policy</a>
+        <a href="/privacy" onclick="openPolicyViewInTab(event, 'privacy')" class="hover:text-white transition-colors">Privacy Policy</a>
         <span>•</span>
-        <a href="/terms" onclick="hijackRouteForNewTab(event, 'terms')" class="hover:text-white transition-colors">Terms & Conditions</a>
+        <a href="/terms" onclick="openPolicyViewInTab(event, 'terms')" class="hover:text-white transition-colors">Terms & Conditions</a>
         <span>•</span>
-        <a href="/contact" onclick="hijackRouteForNewTab(event, 'contact')" class="hover:text-white transition-colors">Contact Us</a>
+        <a href="/contact" onclick="openPolicyViewInTab(event, 'contact')" class="hover:text-white transition-colors">Contact Us</a>
         
         <p class="text-[10px] text-white/40 mt-4">&copy; 2026 Fatima TTS Studio. All rights reserved.</p>
     </footer>
 
-    <!-- Hidden Utility Media Elements -->
+    <!-- Utilities Hidden Media Engines -->
     <audio id="audioPlayer" style="display: none;"></audio>
     <audio id="silentPreviewPlayer" style="display: none;"></audio>
 
     <script>
         const voices = [
-            // Urdu (Pakistan & India)
             { id: "ur-PK-UzmaNeural", name: "Urdu (PK) - Uzma [Female]", lang: "ur" },
             { id: "ur-PK-AsadNeural", name: "Urdu (PK) - Asad [Male]", lang: "ur" },
             { id: "ur-IN-GulNeural", name: "Urdu (IN) - Gul [Female]", lang: "ur" },
             { id: "ur-IN-SalmanNeural", name: "Urdu (IN) - Salman [Male]", lang: "ur" },
-            
-            // Hindi (India)
             { id: "hi-IN-SwaraNeural", name: "Hindi (IN) - Swara [Female]", lang: "hi" },
             { id: "hi-IN-MadhurNeural", name: "Hindi (IN) - Madhur [Male]", lang: "hi" },
-
-            // English (US)
             { id: "en-US-SteffanNeural", name: "English (US) - Steffan [Male - Premium]", lang: "en" },
             { id: "en-US-AriaNeural", name: "English (US) - Aria [Female]", lang: "en" },
             { id: "en-US-GuyNeural", name: "English (US) - Guy [Male]", lang: "en" },
@@ -282,8 +281,6 @@
             { id: "en-US-AndrewNeural", name: "English (US) - Andrew [Male]", lang: "en" },
             { id: "en-US-AvaNeural", name: "English (US) - Ava [Female]", lang: "en" },
             { id: "en-US-BrianNeural", name: "English (US) - Brian [Male]", lang: "en" },
-
-            // English (UK / Australia / India)
             { id: "en-GB-SoniaNeural", name: "English (UK) - Sonia [Female]", lang: "en" },
             { id: "en-GB-RyanNeural", name: "English (UK) - Ryan [Male]", lang: "en" },
             { id: "en-GB-LibbyNeural", name: "English (UK) - Libby [Female]", lang: "en" },
@@ -291,41 +288,25 @@
             { id: "en-AU-WilliamNeural", name: "English (AUS) - William [Male]", lang: "en" },
             { id: "en-IN-NeerjaNeural", name: "English (IND) - Neerja [Female]", lang: "en" },
             { id: "en-IN-PrabhatNeural", name: "English (IND) - Prabhat [Male]", lang: "en" },
-
-            // Arabic
             { id: "ar-SA-ZariyahNeural", name: "Arabic (SA) - Zariyah [Female]", lang: "ar" },
             { id: "ar-SA-HamedNeural", name: "Arabic (SA) - Hamed [Male]", lang: "ar" },
             { id: "ar-EG-SalmaNeural", name: "Arabic (EG) - Salma [Female]", lang: "ar" },
             { id: "ar-AE-FatimaNeural", name: "Arabic (UAE) - Fatima [Female]", lang: "ar" },
             { id: "ar-AE-HamdanNeural", name: "Arabic (UAE) - Hamdan [Male]", lang: "ar" },
-
-            // Spanish
             { id: "es-ES-ElviraNeural", name: "Spanish (ES) - Elvira [Female]", lang: "es" },
             { id: "es-ES-AlvaroNeural", name: "Spanish (ES) - Alvaro [Male]", lang: "es" },
             { id: "es-MX-DaliaNeural", name: "Spanish (MX) - Dalia [Female]", lang: "es" },
             { id: "es-MX-JorgeNeural", name: "Spanish (MX) - Jorge [Male]", lang: "es" },
-
-            // French
             { id: "fr-FR-DeniseNeural", name: "French (FR) - Denise [Female]", lang: "fr" },
             { id: "fr-FR-HenriNeural", name: "French (FR) - Henri [Male]", lang: "fr" },
-
-            // German
             { id: "de-DE-KatjaNeural", name: "German (DE) - Katja [Female]", lang: "de" },
             { id: "de-DE-ConradNeural", name: "German (DE) - Conrad [Male]", lang: "de" },
-
-            // Turkish
             { id: "tr-TR-EmelNeural", name: "Turkish (TR) - Emel [Female]", lang: "tr" },
             { id: "tr-TR-AhmetNeural", name: "Turkish (TR) - Ahmet [Male]", lang: "tr" },
-
-            // Persian
             { id: "fa-IR-DilaraNeural", name: "Persian (IR) - Dilara [Female]", lang: "fa" },
             { id: "fa-IR-FaridNeural", name: "Persian (IR) - Farid [Male]", lang: "fa" },
-
-            // Afrikaans
             { id: "af-ZA-AdriNeural", name: "Afrikaans (ZA) - Adri [Female]", lang: "af" },
             { id: "af-ZA-WillemNeural", name: "Afrikaans (ZA) - Willem [Male]", lang: "af" },
-
-            // Hebrew
             { id: "he-IL-HilaNeural", name: "Hebrew (IL) - Hila [Female]", lang: "he" },
             { id: "he-IL-AvriNeural", name: "Hebrew (IL) - Avri [Male]", lang: "he" }
         ];
@@ -374,7 +355,7 @@
             renderVoices();
         }
 
-        // ================= MAXIMUM EXTENDED HIGH-DENSITY SEO CONTENT PACKETS FOR COMPLIANCE =================
+        // ================= DETAILED HIGH-DENSITY CONTENT STRINGS FOR PREVENTING ADSENSE FLAGS =================
         const comprehensiveDataDocs = {
             about: {
                 title: "About Our Studio",
@@ -410,41 +391,41 @@
             },
             contact: {
                 title: "Official Developer Support Channels",
-                content: `<p class="mb-4">For enterprise API partnerships, business integration inquiries, precise structural bug document submissions, or architectural layout suggestions regarding the <strong>Fatima TTS Studio</strong> workspace framework, please reach out directly via our centralized electronic monitoring deck.</p>
+                content: `<p class="mb-4">For enterprise API partnerships, business integration inquiries, precise structural bug document submissions, or architectural layout suggestions regarding the <strong>Fatima TTS Studio</strong> workspace framework, please reach out directly via our verified electronic monitoring deck.</p>
                           <p class="mb-4">Our systems engineering group systematically tracks platform performance stats, conversion velocities, and layout responses to maintain absolute speed stability for digital creators worldwide.</p>
                           <div class="my-6 p-6 bg-slate-50 border border-slate-200 rounded-2xl text-center">
-                              <span class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Electronic Support Desk</span>
+                              <span class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Official Communications Hub</span>
                               <a href="mailto:anjaanshahzadi27@gmail.com" class="text-[#155dfc] font-black text-base select-all tracking-wide">anjaanshahzadi27@gmail.com</a>
                           </div>
                           <p class="mb-4">Please allow up to 24 to 48 standard business operation hours for our dashboard managers to process your structural email entries, investigate any attached log lines, and provide clear operational solutions.</p>`
             }
         };
 
-        // ================= DYNAMIC ROUTE REDIRECTION ENGINE =================
-        function hijackRouteForNewTab(event, pageKey) {
+        // ================= THE NATIVE CROSS-TAB ROUTE SYNC GENERATOR =================
+        function openPolicyViewInTab(event, pageKey) {
             event.preventDefault();
             
-            if (window.name === `tts_${pageKey}_window`) {
+            // Check if user is already inside an isolated tab window configuration framework
+            if (window.name === `tts_${pageKey}_session`) {
                 renderSubRoutePageHTML(pageKey);
                 return;
             }
 
             const cleanTargetUrl = event.currentTarget.getAttribute('href');
-            const newTabWindow = window.open(cleanTargetUrl, `tts_${pageKey}_window`);
             
-            if (newTabWindow) {
-                newTabWindow.addEventListener('load', function() {
-                    if (typeof newTabWindow.bootAsSubPage === 'function') {
-                        newTabWindow.bootAsSubPage(pageKey);
+            // Open a true clean separate window tab mapping the real domain URL pathway path parameters
+            const remoteWindow = window.open(cleanTargetUrl, `tts_${pageKey}_session`);
+            
+            if (remoteWindow) {
+                // Safely broadcast structural code setup text configurations inside the target context
+                remoteWindow.addEventListener('load', function() {
+                    localStorage.setItem(`tts_route_trigger`, pageKey);
+                    if (typeof remoteWindow.eval === 'function') {
+                        remoteWindow.location.reload(); 
                     }
                 });
             }
         }
-
-        function bootAsSubPage(key) {
-            renderSubRoutePageHTML(key);
-        }
-        window.bootAsSubPage = bootAsSubPage;
 
         function renderSubRoutePageHTML(key) {
             document.getElementById('mainStudioAppView').classList.add('hidden');
@@ -455,16 +436,22 @@
         }
 
         function closeSubRoutePage() {
+            localStorage.removeItem('tts_route_trigger');
             window.history.replaceState({}, "", "/");
             document.getElementById('subPagePolicyView').classList.add('hidden');
             document.getElementById('mainStudioAppView').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // Automated self-healing configuration check to capture data payloads from localized routing requests
         window.addEventListener('DOMContentLoaded', () => {
             const currentPath = window.location.pathname.replace('/', '');
-            if (['about', 'privacy', 'terms', 'contact'].includes(currentPath)) {
-                renderSubRoutePageHTML(currentPath);
+            const cacheTrigger = localStorage.getItem('tts_route_trigger');
+            
+            const activeKey = ['about', 'privacy', 'terms', 'contact'].includes(currentPath) ? currentPath : cacheTrigger;
+            
+            if (activeKey && ['about', 'privacy', 'terms', 'contact'].includes(activeKey)) {
+                renderSubRoutePageHTML(activeKey);
             }
         });
 
@@ -576,7 +563,9 @@
         silentPreviewPlayer.onended = () => {
             if (currentlyPlayingVoiceId) {
                 const playIconBtn = document.querySelector(`#playBtn-${currentlyPlayingVoiceId} i`);
-                if (playIconBtn) playIconBtn.className = 'fa-solid fa-play text-xs';
+                if (playIconBtn) {
+                    playIconBtn.className = 'fa-solid fa-play text-xs';
+                }
                 currentlyPlayingVoiceId = null;
             }
         };
