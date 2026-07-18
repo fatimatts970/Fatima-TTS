@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fatima-tts.vercel.app/sitemap.xml
