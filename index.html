@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -97,27 +97,27 @@
         </a>
         <div class="flex items-center bg-white/10 border border-white/20 rounded-full px-3 py-1 text-xs">
             <i class="fa-solid fa-globe mr-1.5 text-white/80"></i>
-            <span class="font-medium">UR / EN</span>
+            <span class="font-medium">EN / UR</span>
         </div>
     </header>
 
     <!-- Main Studio Dashboard Container Box -->
     <div class="w-full max-w-lg glass-card p-6 md:p-8 relative overflow-hidden mb-8">
-        <!-- Main Headline View Wrapped in Single Line -->
-        <div class="text-center mb-6 relative z-10">
-            <h1 class="text-xl md:text-2xl font-bold tracking-tight text-white whitespace-nowrap overflow-hidden text-ellipsis">
+        <!-- Main Headline View (Scaled Text Sizes to Fix Character Break issues) -->
+        <div class="text-center mb-6 relative z-10 w-full overflow-hidden">
+            <h1 class="text-lg md:text-xl font-bold tracking-tight text-white block w-full truncate">
                 Fatima Text To Speech Studio
             </h1>
             <p class="text-xs text-white/80 font-medium tracking-wide mt-2">
-                <i class="fa-solid fa-bolt mr-1 text-yellow-300 animate-pulse"></i> Total 35 Premium Global Voices Active Hain!
+                <i class="fa-solid fa-bolt mr-1 text-yellow-300 animate-pulse"></i> Total 35 Premium Global Voices Active Now!
             </p>
         </div>
 
         <!-- Text Area Box with Characters Counter Integration -->
         <div class="mb-6 relative z-10">
             <div class="relative">
-                <textarea id="scriptText" placeholder="Apni script yahan likhein..." 
-                    class="w-full h-32 px-4 py-3 bg-black/20 border border-white/20 rounded-xl focus:outline-none focus:border-white text-white placeholder-white/50 resize-none transition duration-300 text-right" dir="auto"></textarea>
+                <textarea id="scriptText" placeholder="Enter your text script here..." 
+                    class="w-full h-32 px-4 py-3 bg-black/20 border border-white/20 rounded-xl focus:outline-none focus:border-white text-white placeholder-white/50 resize-none transition duration-300 text-left" dir="auto"></textarea>
                 <!-- Character Counter Placement Option -->
                 <div class="absolute bottom-2.5 left-3.5 bg-black/40 px-2 py-0.5 rounded-md text-[10px] tracking-wide font-mono text-white/80 border border-white/10">
                     <span id="charCount">0</span> Characters
@@ -200,7 +200,7 @@
                     <div class="w-6 h-6 rounded-full bg-[#155dfc] text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</div>
                     <div>
                         <h4 class="font-bold text-slate-900">Select Global Voice Model</h4>
-                        <p class="text-slate-500 text-xs">Filter through the active list of 35 multi-language premium neural characters.</p>
+                        <p class="text-slate-500 text-xs">Filter through the active list of multi-language premium neural characters.</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
@@ -257,16 +257,16 @@
         </section>
     </div>
 
-    <!-- ================= PREMIUM EXTERNAL ADSENES COMPLIANT FOOTER ================= -->
+    <!-- ================= PREMIUM ADSENES COMPLIANT FOOTER ================= -->
     <footer class="w-full max-w-lg text-center py-6 border-t border-white/20 text-xs text-white/60 space-x-3 relative z-10">
-        <!-- Re-routed to open natively in absolute standalone New Windows/Tabs -->
-        <a href="/about" target="_blank" class="hover:text-white transition-colors">About Us</a>
+        <!-- New Tab Script Interface Pipeline Mechanism -->
+        <button onclick="openPolicyWindow('about')" class="hover:text-white transition-colors">About Us</button>
         <span>•</span>
-        <a href="/privacy" target="_blank" class="hover:text-white transition-colors">Privacy Policy</a>
+        <button onclick="openPolicyWindow('privacy')" class="hover:text-white transition-colors">Privacy Policy</button>
         <span>•</span>
-        <a href="/terms" target="_blank" class="hover:text-white transition-colors">Terms & Conditions</a>
+        <button onclick="openPolicyWindow('terms')" class="hover:text-white transition-colors">Terms & Conditions</button>
         <span>•</span>
-        <a href="/contact" target="_blank" class="hover:text-white transition-colors">Contact Us</a>
+        <button onclick="openPolicyWindow('contact')" class="hover:text-white transition-colors">Contact Us</button>
         
         <p class="text-[10px] text-white/40 mt-4">&copy; 2026 Fatima TTS Studio. All rights reserved.</p>
     </footer>
@@ -363,12 +363,12 @@
         const playerSeeker = document.getElementById('playerSeeker');
         const playerTime = document.getElementById('playerTime');
 
-        // Dynamic 10000% Original Character Counter Tracker Option
+        // Character tracking count logic
         scriptText.addEventListener('input', function() {
             charCount.innerText = this.value.length;
         });
 
-        // Accordion Selection Tracker Box
+        // FAQ accordion management toggle
         function toggleFaq(el) {
             const isActive = el.classList.contains('active');
             document.querySelectorAll('.faq-item').forEach(item => item.classList.remove('active'));
@@ -534,7 +534,7 @@
         generateBtn.onclick = async function() {
             const text = scriptText.value.trim();
             if (!text) {
-                alert("Pehle koi script likhein!");
+                alert("Please enter a text script first!");
                 return;
             }
 
@@ -638,7 +638,7 @@
                 link.click();
                 document.body.removeChild(link);
             } else {
-                alert("Pehle koi voice generate karein!");
+                alert("Please generate a voice clip first!");
             }
         };
 
@@ -647,6 +647,26 @@
             const minutes = Math.floor(secs / 60);
             const seconds = Math.floor(secs % 60);
             return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+
+        // AdSense Integration Page Content Mapping
+        const pageContent = {
+            about: `<html><head><title>About Us</title><style>body{font-family:sans-serif;padding:30px;color:#333;line-height:1.6;}h1{color:#155dfc;}</style></head><body><h1>About Us</h1><p>Welcome to <strong>Fatima TTS</strong>, a premium high-performance Text-to-Speech studio utility tool designed to convert text scripts into crystal-clear realistic voiceovers instantly.</p><p>We specialize in processing natural language workflows using cutting-edge dynamic media rendering models to deliver fast, seamless speech generation features worldwide.</p></body></html>`,
+            privacy: `<html><head><title>Privacy Policy</title><style>body{font-family:sans-serif;padding:30px;color:#333;line-height:1.6;}h1{color:#155dfc;}</style></head><body><h1>Privacy Policy</h1><p>At Fatima TTS, we prioritize user data protection. We do not store, retain, or save any script data or user input on our server pipelines.</p><p>All generated dynamic audio outputs are streamed instantly and temporarily processed. We do not use persistent tracking cookies, ensuring a secure environment for all content creation processes.</p></body></html>`,
+            terms: `<html><head><title>Terms & Conditions</title><style>body{font-family:sans-serif;padding:30px;color:#333;line-height:1.6;}h1{color:#155dfc;}</style></head><body><h1>Terms & Conditions</h1><p>By utilizing the tools provided on Fatima TTS, you agree to access our services in a fair and non-malicious manner. Our platform is provided 'as-is' without liability for network level execution dropouts.</p><p>Automated scraping or spamming of the voice generation application programming interfaces is strictly prohibited to maintain premium speeds for everyone.</p></body></html>`,
+            contact: `<html><head><title>Contact Us</title><style>body{font-family:sans-serif;padding:30px;color:#333;line-height:1.6;}h1{color:#155dfc;}</style></head><body><h1>Contact Us</h1><p>Have questions, business inquiries, or technical feedback regarding Fatima TTS? Reach out directly via our official channel infrastructure.</p><p><strong>Email support:</strong> anjaanshahzadi27@gmail.com</p><p>We value user input and aim to respond within 24 to 48 standard tracking hours.</p></body></html>`
+        };
+
+        // 10000% Working Dynamic New Window Tab Opener System Fix
+        function openPolicyWindow(pageKey) {
+            const newWindow = window.open('', '_blank');
+            if (newWindow) {
+                newWindow.document.open();
+                newWindow.document.write(pageContent[pageKey]);
+                newWindow.document.close();
+            } else {
+                alert("Popup blocked! Please allow popups for this site to view compliance documentation.");
+            }
         }
 
         renderVoices();
