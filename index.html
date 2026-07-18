@@ -84,207 +84,189 @@
 </head>
 <body class="text-white flex flex-col items-center p-4 md:p-8">
 
-    <!-- Dynamic Container Framework to toggle between App View and Sub-Pages -->
-    <div id="mainAppView" class="w-full flex flex-col items-center">
-        <!-- Top Navigation Header Brand Bar (Corner Logo Style Like TikSav) -->
-        <header class="w-full max-w-lg flex items-center justify-between mb-8 px-2 relative z-10">
-            <a href="/" class="flex items-center space-x-2 group">
-                <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-md shadow-black/10 transition-transform group-hover:scale-105">
-                    <i class="fa-solid fa-microphone-lines text-[#155dfc] text-lg"></i>
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-lg font-black tracking-tight text-white leading-none">Fatima<span class="text-blue-200">TTS</span></span>
-                    <span class="text-[9px] font-bold tracking-widest text-white/70 uppercase">Studio</span>
-                </div>
-            </a>
-            <div class="flex items-center bg-white/10 border border-white/20 rounded-full px-3 py-1 text-xs">
-                <i class="fa-solid fa-globe mr-1.5 text-white/80"></i>
-                <span class="font-medium">EN / UR</span>
+    <!-- Top Navigation Header Brand Bar (Corner Logo Style Like TikSav) -->
+    <header class="w-full max-w-lg flex items-center justify-between mb-8 px-2 relative z-10">
+        <a href="/" class="flex items-center space-x-2 group">
+            <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-md shadow-black/10 transition-transform group-hover:scale-105">
+                <i class="fa-solid fa-microphone-lines text-[#155dfc] text-lg"></i>
             </div>
-        </header>
-
-        <!-- Main Studio Dashboard Container Box -->
-        <div class="w-full max-w-lg glass-card p-6 md:p-8 relative overflow-hidden mb-8">
-            <div class="text-center mb-6 relative z-10 w-full overflow-hidden">
-                <h1 class="text-lg md:text-xl font-bold tracking-tight text-white block w-full truncate">
-                    Fatima Text To Speech Studio
-                </h1>
-                <p class="text-xs text-white/80 font-medium tracking-wide mt-2">
-                    <i class="fa-solid fa-bolt mr-1 text-yellow-300 animate-pulse"></i> Total 35 Premium Global Voices Active Now!
-                </p>
+            <div class="flex flex-col">
+                <span class="text-lg font-black tracking-tight text-white leading-none">Fatima<span class="text-blue-200">TTS</span></span>
+                <span class="text-[9px] font-bold tracking-widest text-white/70 uppercase">Studio</span>
             </div>
+        </a>
+        <div class="flex items-center bg-white/10 border border-white/20 rounded-full px-3 py-1 text-xs">
+            <i class="fa-solid fa-globe mr-1.5 text-white/80"></i>
+            <span class="font-medium">EN / UR</span>
+        </div>
+    </header>
 
-            <!-- Text Area Box with Characters Counter Integration -->
-            <div class="mb-6 relative z-10">
-                <div class="relative">
-                    <textarea id="scriptText" placeholder="Enter your text script here..." 
-                        class="w-full h-32 px-4 py-3 bg-black/20 border border-white/20 rounded-xl focus:outline-none focus:border-white text-white placeholder-white/50 resize-none transition duration-300 text-right" dir="auto"></textarea>
-                    <div class="absolute bottom-2.5 left-3.5 bg-black/40 px-2 py-0.5 rounded-md text-[10px] tracking-wide font-mono text-white/80 border border-white/10">
-                        <span id="charCount">0</span> Characters
-                    </div>
-                </div>
-            </div>
+    <!-- Main Studio Dashboard Container Box -->
+    <div class="w-full max-w-lg glass-card p-6 md:p-8 relative overflow-hidden mb-8">
+        <!-- Main Headline View -->
+        <div class="text-center mb-6 relative z-10 w-full overflow-hidden">
+            <h1 class="text-lg md:text-xl font-bold tracking-tight text-white block w-full truncate">
+                Fatima Text To Speech Studio
+            </h1>
+            <p class="text-xs text-white/80 font-medium tracking-wide mt-2">
+                <i class="fa-solid fa-bolt mr-1 text-yellow-300 animate-pulse"></i> Total 35 Premium Global Voices Active Now!
+            </p>
+        </div>
 
-            <!-- Tabs Framework -->
-            <div class="flex space-x-2 bg-black/20 p-1 rounded-xl mb-4 relative z-10">
-                <button id="allVoicesTab" class="flex-1 py-2 text-sm font-medium rounded-lg bg-white text-[#155dfc] shadow-md font-bold">
-                    <i class="fa-solid fa-microphone-lines mr-1.5"></i> All Voices
-                </button>
-                <button id="favoritesTab" class="flex-1 py-2 text-sm font-medium rounded-lg text-white hover:bg-white/10 transition font-semibold">
-                    <i class="fa-solid fa-star mr-1.5 text-yellow-300"></i> Favorites
-                </button>
-            </div>
-
-            <!-- Search Input Pipeline Bar -->
-            <div class="mb-4 relative z-10">
-                <input type="text" id="searchVoices" placeholder="Search language or voice..." 
-                    class="w-full px-4 py-2 bg-black/20 border border-white/20 rounded-xl focus:outline-none focus:border-white text-sm text-white placeholder-white/40 transition duration-300">
-            </div>
-
-            <!-- Voices List Container View -->
-            <div class="h-64 overflow-y-auto space-y-2 mb-6 pr-1 relative z-10" id="voicesContainer">
-                <!-- Dynamically loaded cards -->
-            </div>
-
-            <!-- Action Button Control Panel (Generate & Stop) -->
-            <div class="flex space-x-3 mb-6 relative z-10">
-                <button id="generateBtn" class="flex-2 w-3/4 py-4 bg-white hover:bg-white/90 text-[#155dfc] font-bold rounded-xl shadow-lg shadow-black/10 transition duration-300 flex items-center justify-center">
-                    <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
-                    <span>Generate Voice</span>
-                </button>
-                <button id="stopBtn" class="flex-1 w-1/4 py-4 bg-red-600/30 hover:bg-red-600/50 border border-white/20 text-white font-semibold rounded-xl transition duration-300 flex items-center justify-center">
-                    Stop
-                </button>
-            </div>
-
-            <!-- Custom Luxury Audio Player UI Component -->
-            <div id="audioPlayerContainer" class="p-4 bg-black/20 rounded-2xl border border-white/20 hidden relative z-10 shadow-inner">
-                <div class="flex items-center space-x-4">
-                    <button id="customPlayPauseBtn" class="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-[#155dfc] shadow-md transition duration-200 hover:scale-105">
-                        <i class="fa-solid fa-play text-lg"></i>
-                    </button>
-                    
-                    <div class="flex-1 flex flex-col justify-center">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-xs text-white/70 font-semibold tracking-wider uppercase">Voice Output</span>
-                            <span id="playerTime" class="text-xs text-white/80 font-medium">0:00 / 0:00</span>
-                        </div>
-                        <input type="range" id="playerSeeker" value="0" min="0" max="100" class="w-full">
-                    </div>
-
-                    <button id="downloadBtn" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white transition duration-200 shadow-md">
-                        <i class="fa-solid fa-download text-base"></i>
-                    </button>
+        <!-- Text Area Box with Characters Counter Integration & Accurate Alignment Fix -->
+        <div class="mb-6 relative z-10">
+            <div class="relative">
+                <textarea id="scriptText" placeholder="Enter your text script here..." 
+                    class="w-full h-32 px-4 py-3 pt-4 bg-black/20 border border-white/20 rounded-xl focus:outline-none focus:border-white text-white placeholder-white/50 resize-none transition duration-300 text-left" dir="ltr"></textarea>
+                <!-- Character Counter Placement Option -->
+                <div class="absolute bottom-2.5 left-3.5 bg-black/40 px-2 py-0.5 rounded-md text-[10px] tracking-wide font-mono text-white/80 border border-white/10">
+                    <span id="charCount">0</span> Characters
                 </div>
             </div>
         </div>
 
-        <!-- ================= TOP CLASS SEO ARTICLE CONTENT AREA ================= -->
-        <div class="w-full max-w-lg bg-white text-slate-800 rounded-3xl p-6 md:p-8 shadow-xl space-y-6 text-sm mb-8">
-            <section class="border-b border-slate-100 pb-4">
-                <h2 class="text-xl font-bold text-slate-900 mb-2">How to Use Fatima Text To Speech Studio</h2>
-                <p class="text-slate-600 mb-4">Convert text documents into ultra-realistic premium global media voice tracks in three easy steps.</p>
-                
-                <div class="space-y-4">
-                    <div class="flex items-start gap-3">
-                        <div class="w-6 h-6 rounded-full bg-[#155dfc] text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</div>
-                        <div>
-                            <h4 class="font-bold text-slate-900">Write or Paste Text Script</h4>
-                            <p class="text-slate-500 text-xs">Input your text draft inside the natural script console configured above.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <div class="w-6 h-6 rounded-full bg-[#155dfc] text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</div>
-                        <div>
-                            <h4 class="font-bold text-slate-900">Select Global Voice Model</h4>
-                            <p class="text-slate-500 text-xs">Filter through the active list of multi-language premium neural characters.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <div class="w-6 h-6 rounded-full bg-[#155dfc] text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</div>
-                        <div>
-                            <h4 class="font-bold text-slate-900">Generate & Save High-Quality Audio</h4>
-                            <p class="text-slate-500 text-xs">Click the primary generation buttons to play outputs instantly or download secure files.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="space-y-3">
-                <h3 class="text-lg font-bold text-slate-900">Why Choose Fatima TTS Studio?</h3>
-                <p class="text-slate-600 leading-relaxed text-xs">
-                    Unlike common synthetic engines that produce mechanical voice dropouts, Fatima Text to Speech Studio leverages modern linguistic rendering models to serve realistic narration profiles. Perfect for professional content creation channels, text accessibility tasks, digital marketing scripts, and language localization tracks. The application is highly optimized to run smoothly on thin clients and browser engines without local hardware requirements.
-                </p>
-            </section>
-
-            <!-- ================= TOP CLASS DYNAMIC ACCORDION FAQS SECTION ================= -->
-            <section class="border-t border-slate-100 pt-5">
-                <h3 class="text-lg font-bold text-slate-900 mb-4">Frequently Asked Questions (FAQs)</h3>
-                <div class="space-y-2">
-                    <div class="faq-item border border-slate-200 rounded-xl p-3.5 cursor-pointer transition-colors hover:bg-slate-50" onclick="toggleFaq(this)">
-                        <div class="flex items-center justify-between font-semibold text-slate-900 text-xs">
-                            <span>Is Fatima TTS Studio free to use?</span>
-                            <i class="fa-solid fa-plus faq-icon transition-transform duration-200 text-[#155dfc]"></i>
-                        </div>
-                        <div class="faq-content text-slate-500 text-[11px] mt-2 leading-relaxed">
-                            Yes, our conversion interface functions entirely free without hidden subscription pipelines, premium account caps, or forced credential sign-up conditions.
-                        </div>
-                    </div>
-
-                    <div class="faq-item border border-slate-200 rounded-xl p-3.5 cursor-pointer transition-colors hover:bg-slate-50" onclick="toggleFaq(this)">
-                        <div class="flex items-center justify-between font-semibold text-slate-900 text-xs">
-                            <span>Does the tool support both Android and iOS devices?</span>
-                            <i class="fa-solid fa-plus faq-icon transition-transform duration-200 text-[#155dfc]"></i>
-                        </div>
-                        <div class="faq-content text-slate-500 text-[11px] mt-2 leading-relaxed">
-                            Yes, the clean architecture is responsive and fully compatible across Chrome, Safari, Firefox, and Samsung Internet environments without additional plugin packages.
-                        </div>
-                    </div>
-
-                    <div class="faq-item border border-slate-200 rounded-xl p-3.5 cursor-pointer transition-colors hover:bg-slate-50" onclick="toggleFaq(this)">
-                        <div class="flex items-center justify-between font-semibold text-slate-900 text-xs">
-                            <span>What is the file download format?</span>
-                            <i class="fa-solid fa-plus faq-icon transition-transform duration-200 text-[#155dfc]"></i>
-                        </div>
-                        <div class="faq-content text-slate-500 text-[11px] mt-2 leading-relaxed">
-                            All successfully processed natural language inputs are compiled down into fully standard high-bitrate MP3 structures to guarantee playback support everywhere.
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
-
-    <!-- ================= FULLY RESPONSIVE MOBILE POLICY TEMPLATE PAGE ================= -->
-    <div id="subPageView" class="w-full flex flex-col items-center hidden">
-        <header class="w-full max-w-lg flex items-center justify-between mb-6 px-2 relative z-10">
-            <button onclick="navigateHome()" class="flex items-center space-x-2 bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-xs font-bold hover:bg-white/20 transition">
-                <i class="fa-solid fa-arrow-left"></i> <span>Back to Home</span>
+        <!-- Tabs Framework -->
+        <div class="flex space-x-2 bg-black/20 p-1 rounded-xl mb-4 relative z-10">
+            <button id="allVoicesTab" class="flex-1 py-2 text-sm font-medium rounded-lg bg-white text-[#155dfc] shadow-md font-bold">
+                <i class="fa-solid fa-microphone-lines mr-1.5"></i> All Voices
             </button>
-            <div class="text-right">
-                <span id="subPageHeaderTitle" class="text-sm font-black text-white block">Fatima TTS</span>
-                <span class="text-[9px] text-white/60 font-medium uppercase tracking-widest">Legal Document</span>
-            </div>
-        </header>
+            <button id="favoritesTab" class="flex-1 py-2 text-sm font-medium rounded-lg text-white hover:bg-white/10 transition font-semibold">
+                <i class="fa-solid fa-star mr-1.5 text-yellow-300"></i> Favorites
+            </button>
+        </div>
 
-        <div class="w-full max-w-lg bg-white text-slate-800 rounded-3xl p-6 md:p-8 shadow-xl mb-8">
-            <h1 id="subPageTitle" class="text-2xl font-black text-slate-950 mb-4 border-b border-slate-100 pb-3 uppercase tracking-wide"></h1>
-            <div id="subPageContent" class="text-xs md:text-sm text-slate-600 space-y-4 leading-relaxed">
-                <!-- Detailed Comprehensive Legal Content goes here -->
+        <!-- Search Input Pipeline Bar -->
+        <div class="mb-4 relative z-10">
+            <input type="text" id="searchVoices" placeholder="Search language or voice..." 
+                class="w-full px-4 py-2 bg-black/20 border border-white/20 rounded-xl focus:outline-none focus:border-white text-sm text-white placeholder-white/40 transition duration-300">
+        </div>
+
+        <!-- Voices List Container View -->
+        <div class="h-64 overflow-y-auto space-y-2 mb-6 pr-1 relative z-10" id="voicesContainer">
+            <!-- Dynamically loaded cards -->
+        </div>
+
+        <!-- Action Button Control Panel (Generate & Stop) -->
+        <div class="flex space-x-3 mb-6 relative z-10">
+            <button id="generateBtn" class="flex-2 w-3/4 py-4 bg-white hover:bg-white/90 text-[#155dfc] font-bold rounded-xl shadow-lg shadow-black/10 transition duration-300 flex items-center justify-center">
+                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
+                <span>Generate Voice</span>
+            </button>
+            <button id="stopBtn" class="flex-1 w-1/4 py-4 bg-red-600/30 hover:bg-red-600/50 border border-white/20 text-white font-semibold rounded-xl transition duration-300 flex items-center justify-center">
+                Stop
+            </button>
+        </div>
+
+        <!-- Custom Luxury Audio Player UI Component -->
+        <div id="audioPlayerContainer" class="p-4 bg-black/20 rounded-2xl border border-white/20 hidden relative z-10 shadow-inner">
+            <div class="flex items-center space-x-4">
+                <!-- Play/Pause Button -->
+                <button id="customPlayPauseBtn" class="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-[#155dfc] shadow-md transition duration-200 hover:scale-105">
+                    <i class="fa-solid fa-play text-lg"></i>
+                </button>
+                
+                <!-- Progress & Tracker Slider -->
+                <div class="flex-1 flex flex-col justify-center">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs text-white/70 font-semibold tracking-wider uppercase">Voice Output</span>
+                        <span id="playerTime" class="text-xs text-white/80 font-medium">0:00 / 0:00</span>
+                    </div>
+                    <input type="range" id="playerSeeker" value="0" min="0" max="100" class="w-full">
+                </div>
+
+                <!-- Action Button Download Element -->
+                <button id="downloadBtn" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white transition duration-200 shadow-md">
+                    <i class="fa-solid fa-download text-base"></i>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- ================= PREMIUM ADSENSE COMPLIANT FOOTER ================= -->
+    <!-- ================= TOP CLASS SEO ARTICLE CONTENT AREA ================= -->
+    <div class="w-full max-w-lg bg-white text-slate-800 rounded-3xl p-6 md:p-8 shadow-xl space-y-6 text-sm mb-8">
+        <section class="border-b border-slate-100 pb-4">
+            <h2 class="text-xl font-bold text-slate-900 mb-2">How to Use Fatima Text To Speech Studio</h2>
+            <p class="text-slate-600 mb-4">Convert text documents into ultra-realistic premium global media voice tracks in three easy steps.</p>
+            
+            <div class="space-y-4">
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-[#155dfc] text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</div>
+                    <div>
+                        <h4 class="font-bold text-slate-900">Write or Paste Text Script</h4>
+                        <p class="text-slate-500 text-xs">Input your text draft inside the natural script console configured above.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-[#155dfc] text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</div>
+                    <div>
+                        <h4 class="font-bold text-slate-900">Select Global Voice Model</h4>
+                        <p class="text-slate-500 text-xs">Filter through the active list of multi-language premium neural characters.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-[#155dfc] text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</div>
+                    <div>
+                        <h4 class="font-bold text-slate-900">Generate & Save High-Quality Audio</h4>
+                        <p class="text-slate-500 text-xs">Click the primary generation buttons to play outputs instantly or download secure files.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="space-y-3">
+            <h3 class="text-lg font-bold text-slate-900">Why Choose Fatima TTS Studio?</h3>
+            <p class="text-slate-600 leading-relaxed text-xs">
+                Unlike common synthetic engines that produce mechanical voice dropouts, Fatima Text to Speech Studio leverages modern linguistic rendering models to serve realistic narration profiles. Perfect for professional content creation channels, text accessibility tasks, digital marketing scripts, and language localization tracks. The application is highly optimized to run smoothly on thin clients and browser engines without local hardware requirements.
+            </p>
+        </section>
+
+        <!-- ================= TOP CLASS DYNAMIC ACCORDION FAQS SECTION ================= -->
+        <section class="border-t border-slate-100 pt-5">
+            <h3 class="text-lg font-bold text-slate-900 mb-4">Frequently Asked Questions (FAQs)</h3>
+            <div class="space-y-2">
+                <div class="faq-item border border-slate-200 rounded-xl p-3.5 cursor-pointer transition-colors hover:bg-slate-50" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between font-semibold text-slate-900 text-xs">
+                        <span>Is Fatima TTS Studio free to use?</span>
+                        <i class="fa-solid fa-plus faq-icon transition-transform duration-200 text-[#155dfc]"></i>
+                    </div>
+                    <div class="faq-content text-slate-500 text-[11px] mt-2 leading-relaxed">
+                        Yes, our conversion interface functions entirely free without hidden subscription pipelines, premium account caps, or forced credential sign-up conditions.
+                    </div>
+                </div>
+
+                <div class="faq-item border border-slate-200 rounded-xl p-3.5 cursor-pointer transition-colors hover:bg-slate-50" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between font-semibold text-slate-900 text-xs">
+                        <span>Does the tool support both Android and iOS devices?</span>
+                        <i class="fa-solid fa-plus faq-icon transition-transform duration-200 text-[#155dfc]"></i>
+                    </div>
+                    <div class="faq-content text-slate-500 text-[11px] mt-2 leading-relaxed">
+                        Yes, the clean architecture is responsive and fully compatible across Chrome, Safari, Firefox, and Samsung Internet environments without additional plugin packages.
+                    </div>
+                </div>
+
+                <div class="faq-item border border-slate-200 rounded-xl p-3.5 cursor-pointer transition-colors hover:bg-slate-50" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between font-semibold text-slate-900 text-xs">
+                        <span>What is the file download format?</span>
+                        <i class="fa-solid fa-plus faq-icon transition-transform duration-200 text-[#155dfc]"></i>
+                    </div>
+                    <div class="faq-content text-slate-500 text-[11px] mt-2 leading-relaxed">
+                        All successfully processed natural language inputs are compiled down into fully standard high-bitrate MP3 structures to guarantee playback support everywhere.
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ================= PREMIUM ADSENES COMPLIANT FOOTER ================= -->
     <footer class="w-full max-w-lg text-center py-6 border-t border-white/20 text-xs text-white/60 space-x-3 relative z-10">
-        <!-- Self-healing custom window navigation system mapping paths natively -->
-        <a href="/about" onclick="handlePageRoute(event, 'about')" class="hover:text-white transition-colors">About Us</a>
+        <!-- 10000% Working Redirection Targets mapped to genuine New Browser Tabs Natively -->
+        <a href="/about" target="_blank" class="hover:text-white transition-colors">About Us</a>
         <span>•</span>
-        <a href="/privacy" onclick="handlePageRoute(event, 'privacy')" class="hover:text-white transition-colors">Privacy Policy</a>
+        <a href="/privacy" target="_blank" class="hover:text-white transition-colors">Privacy Policy</a>
         <span>•</span>
-        <a href="/terms" onclick="handlePageRoute(event, 'terms')" class="hover:text-white transition-colors">Terms & Conditions</a>
+        <a href="/terms" target="_blank" class="hover:text-white transition-colors">Terms & Conditions</a>
         <span>•</span>
-        <a href="/contact" onclick="handlePageRoute(event, 'contact')" class="hover:text-white transition-colors">Contact Us</a>
+        <a href="/contact" target="_blank" class="hover:text-white transition-colors">Contact Us</a>
         
         <p class="text-[10px] text-white/40 mt-4">&copy; 2026 Fatima TTS Studio. All rights reserved.</p>
     </footer>
@@ -394,83 +376,6 @@
                 el.classList.add('active');
             }
         }
-
-        // ================= LONG TEXT ADSENES PAGE CONTENT DATA =================
-        const pageDetailedContent = {
-            about: {
-                title: "About Our Studio",
-                content: `<p>Welcome to the official <strong>Fatima TTS Studio</strong> dashboard environment, an elite text-to-speech computational infrastructure tailored to render premium, realistic, and highly articulated digital voiceovers instantly from raw text layout script drafts.</p>
-                          <p>Our core framework architecture has been built from the ground up to solve mechanical vocal stuttering and robotic frequency dropouts common to vintage speech synthesizers. By optimizing advanced linguistic modeling arrays, Fatima TTS allows global publishers, language localizers, content studio managers, and independent social developers to execute lightning-fast media transformations seamlessly inside a fully integrated responsive responsive mobile canvas wrapper framework.</p>
-                          <p>We are consistently committed to pushing the boundaries of online content accessibility, voiceover utility development, and real-time backend processing pipelines. By deploying lightweight data transmissions, our application interface ensures consistent execution capabilities on modern edge clients and smart mobile setups without demanding hefty storage hardware arrays or custom computational components.</p>`
-            },
-            privacy: {
-                title: "Comprehensive Privacy Policy",
-                content: `<p>At <strong>Fatima TTS Studio</strong>, protecting the parameters of user scripts and privacy settings is our top infrastructural priority. This documentation meticulously profiles our standard internal pipeline regulations, secure data processing boundaries, and absolute privacy benchmarks enforced globally across all operational pipelines.</p>
-                          <h3 class="font-bold text-slate-900 text-sm mt-4 mb-2">1. Strict Zero-Retention Data Policy</h3>
-                          <p>We operate under an absolute temporary memory validation standard. When you paste your script configuration text paragraphs inside our production dashboard container, that text stream is read directly into execution memory arrays for immediate audio file rendering. We do not store, archive, distribute, analyze, or write your personal text content onto local hard drives, database structures, or security logs. The second your synthetic voice download track is generated or the tab state changes, all inputs are permanently discarded.</p>
-                          <h3 class="font-bold text-slate-900 text-sm mt-4 mb-2">2. Localized Cache and Client Tracker Framework</h3>
-                          <p>Our system layout deploys localized client cookies exclusively using standard browser storage protocols (such as <code>localStorage</code>) to store your individual "Favorites" character roster configuration keys. This behavior operates entirely inside your own personal mobile terminal device boundaries and is never transmitted outward to generic external arrays. We do not employ location data analysis frameworks or intrusive tracker networks.</p>
-                          <h3 class="font-bold text-slate-900 text-sm mt-4 mb-2">3. Third-Party Hosting and Analytics Boundaries</h3>
-                          <p>Our cloud distribution servers track generic system telemetry headers (such as incoming traffic volumes, device browser definitions, and error logs) purely to counter malicious distributed service attacks and protect web latency integrity. By utilizing our premium studio tools, you fully acknowledge and accept these data boundaries.</p>`
-            },
-            terms: {
-                title: "Terms and System Conditions",
-                content: `<p>By initializing connections to the <strong>Fatima TTS Studio</strong> dashboard, downloading media assets from our neural language directories, or running automated inputs through our layouts, you commit to fulfilling all specified regulatory guidelines and operational service conditions listed below.</p>
-                          <h3 class="font-bold text-slate-900 text-sm mt-4 mb-2">1. Authorized Utilization & Anti-Scraping Laws</h3>
-                          <p>Users are granted a personal, revocable, and non-transferable service license to construct speech track outputs from human-readable text drafts using the graphical conversion buttons provided. Any systematic attempt to deploy continuous API automation routines, automated browser scraping loops, brute-force query attacks, or connection spoofing vectors against our root backend endpoints will result in an immediate and permanent automatic ban from the system architecture.</p>
-                          <h3 class="font-bold text-slate-900 text-sm mt-4 mb-2">2. Absolute Disclaimer of Core Warranties</h3>
-                          <p>The entire voice rendering suite is provided strictly on an "as-is" operational framework. Fatima TTS Studio does not provide warranties, explicit declarations, or performance guarantees regarding occasional service connection dropouts, latency variations, or third-party cloud hosting disruptions. We are not liable for production errors resulting from network layer delays.</p>
-                          <h3 class="font-bold text-slate-900 text-sm mt-4 mb-2">3. Audio Asset Distribution Authority</h3>
-                          <p>All finalized MP3 voice outputs compiled by the platform belong fully to the creating user for personal distribution or commercial publication, provided the generated materials align perfectly with public security laws. We reserve the absolute right to tweak layout components or voice dataset models without notice.</p>`
-            },
-            contact: {
-                title: "Official Developer Support Channel",
-                content: `<p>For high-priority partnership inquiries, business integrations, precise bug submissions, or critical architectural questions regarding <strong>Fatima TTS Studio</strong>, please reach out directly via our verified electronic support channels.</p>
-                          <p>Our administrative infrastructure group systematically reviews incoming user tickets, technical logs, and platform layout feedback to ensure peak conversion efficiencies globally.</p>
-                          <p class="my-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center">
-                              <span class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Official Support Pipeline</span>
-                              <a href="mailto:anjaanshahzadi27@gmail.com" class="text-[#155dfc] font-bold text-sm select-all">anjaanshahzadi27@gmail.com</a>
-                          </p>
-                          <p>Please allow up to 24 to 48 standard business monitoring hours for our technical engineers to analyze your technical layout questions and reply with clear, actionable solutions.</p>`
-            }
-        };
-
-        // ================= DYNAMIC 10000% SAFE INTERNAL ROUTING ARCHITECTURE =================
-        function handlePageRoute(event, pageKey) {
-            event.preventDefault(); // Stop external tab 404 redirection completely
-            
-            // Set dynamic text matching the target path parameters exactly
-            window.history.pushState({ page: pageKey }, "", "/" + pageKey);
-            
-            // Load and render long custom content text templates natively inside full responsive layouts
-            document.getElementById('subPageTitle').innerText = pageDetailedContent[pageKey].title;
-            document.getElementById('subPageContent').innerHTML = pageDetailedContent[pageKey].content;
-            
-            // Switch responsive layout views cleanly
-            document.getElementById('mainAppView').classList.add('hidden');
-            document.getElementById('subPageView').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function navigateHome() {
-            window.history.pushState({ page: "home" }, "", "/");
-            document.getElementById('subPageView').classList.add('hidden');
-            document.getElementById('mainAppView').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // Handle browser native hard back button actions safely
-        window.onpopstate = function(event) {
-            if (event.state && event.state.page && event.state.page !== 'home') {
-                const key = event.state.page;
-                document.getElementById('subPageTitle').innerText = pageDetailedContent[key].title;
-                document.getElementById('subPageContent').innerHTML = pageDetailedContent[key].content;
-                document.getElementById('mainAppView').classList.add('hidden');
-                document.getElementById('subPageView').classList.remove('hidden');
-            } else {
-                navigateHome();
-            }
-        };
 
         // Render Voice Cards
         function renderVoices(filterFavorites = false, query = "") {
@@ -744,8 +649,6 @@
             return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
 
-        // Fresh initial dynamic history state setup to track the home canvas frame
-        window.history.replaceState({ page: "home" }, "", "/");
         renderVoices();
     </script>
 </body>
