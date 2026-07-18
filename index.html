@@ -1,75 +1,169 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fatima TTS - Premium Voice Studio</title>
+    <!-- Tailwind CSS & Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons Link -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { background-color: #0b0f19; }
-        .custom-card { background-color: #111827; border: 1px solid #1f2937; }
-        .btn-purple { background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); }
-        .voice-list-scroll::-webkit-scrollbar { width: 6px; }
-        .voice-list-scroll::-webkit-scrollbar-track { background: #0f172a; border-radius: 8px; }
-        .voice-list-scroll::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 8px; }
-        .voice-list-scroll::-webkit-scrollbar-thumb:hover { background: #374151; }
-        .selected-voice-card { border-color: #a855f7 !important; background-color: rgba(168, 85, 247, 0.1) !important; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at center, #1e1035 0%, #090314 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .voice-card {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .voice-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(168, 85, 247, 0.4);
+        }
+        .voice-card.selected {
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(79, 70, 229, 0.2) 100%);
+            border-color: #a855f7;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+        }
+        /* Custom Seek Slider Range Styling (Real & Smooth) */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 6px;
+            outline: none;
+            transition: background 0.3s;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #a855f7;
+            cursor: pointer;
+            box-shadow: 0 0 8px #a855f7;
+            transition: transform 0.1s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.3);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(168, 85, 247, 0.5);
+        }
     </style>
 </head>
-<body class="text-gray-200 font-sans min-h-screen flex flex-col items-center p-4">
+<body class="text-gray-100 flex flex-col items-center justify-center p-4 md:p-8">
 
-    <!-- Top Navigation Brand Bar -->
-    <div class="w-full max-w-md flex flex-col items-center justify-center mb-6 pt-4 text-center">
-        <div class="w-14 h-14 rounded-2xl btn-purple flex items-center justify-center shadow-lg shadow-purple-500/30 mb-3">
-            <span class="text-white text-2xl font-black">F</span>
-        </div>
-        <h1 class="text-2xl font-black tracking-wider text-white">Fatima TTS</h1>
-        <p class="text-xs uppercase tracking-widest text-purple-400 font-bold mt-1">Premium Voice Studio</p>
-        <div class="mt-3 bg-slate-900/80 border border-slate-800 rounded-full px-4 py-1 flex items-center gap-2 text-[11px] text-amber-400 font-medium">
-            <i class="fa-solid fa-bolt text-xs"></i> Total <span id="voiceCount">35</span> Premium Global Voices Active Hain!
-        </div>
-    </div>
+    <div class="w-full max-w-lg glass-card p-6 md:p-8 relative overflow-hidden">
+        <!-- Background Glows -->
+        <div class="absolute -top-24 -left-24 w-48 h-48 bg-purple-600 rounded-full blur-[80px] opacity-30"></div>
+        <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-600 rounded-full blur-[80px] opacity-30"></div>
 
-    <!-- Main Dynamic Application Container -->
-    <div class="w-full max-w-md space-y-4">
-        
-        <!-- Input Script Configuration Panel -->
-        <div class="custom-card rounded-2xl p-5 shadow-xl">
-            <textarea id="textScript" placeholder="Apni script yahan likhein..." 
-                      class="w-full h-32 bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-purple-500 placeholder-gray-600 resize-none transition-all"></textarea>
+        <!-- Logo & Header -->
+        <div class="text-center mb-6 relative z-10">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-blue-500 shadow-lg shadow-purple-500/30 mb-3">
+                <span class="text-3xl font-extrabold text-white tracking-wider">F</span>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">Fatima TTS</h1>
+            <p class="text-xs uppercase tracking-widest text-gray-400 font-semibold mt-1">Premium Voice Studio</p>
             
-            <!-- Quick View Mode Filter State Selector Tabs -->
-            <div class="grid grid-cols-2 gap-2 mt-4">
-                <button id="tabAll" onclick="switchTab('all')" class="btn-purple text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-600/10 transition-all">
-                    <i class="fa-solid fa-microphone text-xs"></i> All Voices
-                </button>
-                <button id="tabFav" onclick="switchTab('fav')" class="bg-slate-950 border border-slate-800 text-gray-400 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 hover:text-gray-200 transition-all">
-                    <i class="fa-solid fa-star text-xs text-amber-500"></i> Favorites
-                </button>
-            </div>
-
-            <!-- Search Pipeline Filtration -->
-            <div class="relative mt-3">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-600">
-                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                </span>
-                <input type="text" id="searchVoice" oninput="filterVoices()" placeholder="Search language or voice..." 
-                       class="w-full bg-slate-950/80 border border-slate-800 rounded-xl py-2.5 pl-9 pr-4 text-xs text-white focus:outline-none focus:border-purple-500 placeholder-gray-600 transition-all">
-            </div>
+            <!-- Yellow Color Counter Line -->
+            <p class="text-sm text-yellow-400 font-medium tracking-wide mt-3">
+                <i class="fa-solid fa-bolt mr-1 animate-pulse"></i> Total 35 Premium Global Voices Active Hain!
+            </p>
         </div>
 
-        <!-- Dynamic Output Stream Active List Wrapper -->
-        <div id="voicesContainer" class="custom-card rounded-2xl p-4 shadow-xl space-y-2 max-h-[40vh] overflow-y-auto voice-list-scroll">
-            <!-- Loaded instantly via original dataset -->
+        <!-- Text Area -->
+        <div class="mb-6 relative z-10">
+            <textarea id="scriptText" placeholder="Apni script yahan likhein..." 
+                class="w-full h-32 px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-purple-500 text-gray-100 placeholder-gray-500 resize-none transition duration-300 text-right" dir="auto"></textarea>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex space-x-2 bg-white/5 p-1 rounded-xl mb-4 relative z-10">
+            <button id="allVoicesTab" class="flex-1 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow">
+                <i class="fa-solid fa-microphone-lines mr-1.5"></i> All Voices
+            </button>
+            <button id="favoritesTab" class="flex-1 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white transition">
+                <i class="fa-solid fa-star mr-1.5 text-yellow-500"></i> Favorites
+            </button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="mb-4 relative z-10">
+            <input type="text" id="searchVoices" placeholder="Search language or voice..." 
+                class="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-purple-500 text-sm text-gray-200 placeholder-gray-500 transition duration-300">
+        </div>
+
+        <!-- Voices List Container -->
+        <div class="h-64 overflow-y-auto space-y-2 mb-6 pr-1 relative z-10" id="voicesContainer">
+            <!-- Voice Cards dynamically injected here -->
+        </div>
+
+        <!-- Action Button Panel (Generate & Stop) -->
+        <div class="flex space-x-3 mb-6 relative z-10">
+            <button id="generateBtn" class="flex-2 w-3/4 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-purple-600/20 transition duration-300 flex items-center justify-center">
+                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
+                <span>Generate Voice</span>
+            </button>
+            <button id="stopBtn" class="flex-1 w-1/4 py-4 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 text-red-400 font-semibold rounded-xl transition duration-300 flex items-center justify-center">
+                Stop
+            </button>
+        </div>
+
+        <!-- Custom Luxury Audio Player Box with Real Timer & Download Button -->
+        <div id="audioPlayerContainer" class="p-4 bg-gradient-to-r from-purple-950/40 to-indigo-950/40 rounded-2xl border border-white/10 hidden relative z-10 shadow-inner">
+            <div class="flex items-center space-x-4">
+                <!-- Play/Pause Button -->
+                <button id="customPlayPauseBtn" class="w-12 h-12 rounded-xl bg-purple-600 hover:bg-purple-500 flex items-center justify-center text-white shadow-md transition duration-200">
+                    <i class="fa-solid fa-play text-lg"></i>
+                </button>
+                
+                <!-- Progress & Details -->
+                <div class="flex-1 flex flex-col justify-center">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs text-gray-400 font-semibold tracking-wider uppercase">Voice Output</span>
+                        <span id="playerTime" class="text-xs text-gray-400 font-medium">0:00 / 0:00</span>
+                    </div>
+                    <!-- Real Timer Progress Line (—•—) -->
+                    <input type="range" id="playerSeeker" value="0" min="0" max="100" class="w-full">
+                </div>
+
+                <!-- Action Buttons: Download Button -->
+                <button id="downloadBtn" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-purple-600/20 border border-white/10 flex items-center justify-center text-gray-300 hover:text-white transition duration-200 shadow-md">
+                    <i class="fa-solid fa-download text-base"></i>
+                </button>
+            </div>
         </div>
     </div>
-
-    <!-- Hidden Audio Player Core -->
-    <audio id="audioPlayer" class="hidden"></audio>
 
     <!-- ================= PREMIUM ADSENSE PAGES SECTION ================= -->
-    <footer class="w-full max-w-md text-center py-6 mt-8 border-t border-slate-800/60 text-xs text-gray-500 space-x-3">
+    <footer class="w-full max-w-lg text-center py-6 mt-6 border-t border-white/10 text-xs text-gray-500 space-x-3 relative z-10">
         <button onclick="openPolicy('about')" class="hover:text-purple-400 transition-colors">About Us</button>
         <span>•</span>
         <button onclick="openPolicy('privacy')" class="hover:text-purple-400 transition-colors">Privacy Policy</button>
@@ -81,153 +175,164 @@
 
     <!-- Dynamic Modal System -->
     <div id="policyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl max-h-[80vh] flex flex-col shadow-2xl">
-            <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+        <div class="bg-slate-900 border border-white/10 w-full max-w-md rounded-2xl max-h-[80vh] flex flex-col shadow-2xl">
+            <div class="p-4 border-b border-white/10 flex justify-between items-center">
                 <h3 id="modalTitle" class="text-sm font-bold text-white uppercase tracking-wider"></h3>
                 <button onclick="closePolicy()" class="text-gray-400 hover:text-white text-lg font-bold">&times;</button>
             </div>
             <div id="modalContent" class="p-5 overflow-y-auto text-xs text-gray-400 space-y-3 leading-relaxed">
-                <!-- Data Content -->
+                <!-- Content Data -->
             </div>
         </div>
     </div>
 
+    <!-- Hidden Background Audio Players -->
+    <audio id="audioPlayer" style="display: none;"></audio>
+    <audio id="silentPreviewPlayer" style="display: none;"></audio>
+
+    <!-- Script Section -->
     <script>
-        // Restored EXACT voice definitions and IDs from your original code file analysis[span_6](start_span)[span_6](end_span)
-        const allVoices = [
-            { id: "ur-PK-UzmaNeural", name: "Urdu (PK) - Uzma", lang: "Urdu (Pakistan)", gender: "Female", sample: "فاطمہ سٹوڈیو میں آپ کا خوش آمدید" },
-            { id: "ur-PK-AsadNeural", name: "Urdu (PK) - Asad", lang: "Urdu (Pakistan)", gender: "Male", sample: "فاطمہ سٹوڈیو میں آپ کا خوش آمدید" },
-            { id: "ur-IN-GulNeural", name: "Urdu (IN) - Gul", lang: "Urdu (India)", gender: "Female", sample: "فاطمہ سٹوڈیو میں آپ کا خوش آمدید" },
-            { id: "ur-IN-SalmanNeural", name: "Urdu (IN) - Salman", lang: "Urdu (India)", gender: "Male", sample: "فاطمہ سٹوڈیو میں آپ کا خوش آمدید" },
-            { id: "en-US-AriaNeural", name: "English (US) - Aria", lang: "English (US)", gender: "Female", sample: "Welcome to Fatima Premium Voice Studio." },
-            { id: "en-US-GuyNeural", name: "English (US) - Guy", lang: "English (US)", gender: "Male", sample: "Welcome to Fatima Premium Voice Studio." },
-            { id: "en-US-JennyNeural", name: "English (US) - Jenny", lang: "English (US)", gender: "Female", sample: "Welcome to Fatima Premium Voice Studio." },
-            { id: "en-GB-SoniaNeural", name: "English (UK) - Sonia", lang: "English (UK)", gender: "Female", sample: "Welcome to Fatima Premium Voice Studio." },
-            { id: "en-GB-RyanNeural", name: "English (UK) - Ryan", lang: "English (UK)", gender: "Male", sample: "Welcome to Fatima Premium Voice Studio." },
-            { id: "hi-IN-SwaraNeural", name: "Hindi (IN) - Swara", lang: "Hindi (India)", gender: "Female", sample: "फातिमा वॉइस स्टूडियो में आपका स्वागत है।" },
-            { id: "hi-IN-MadhurNeural", name: "Hindi (IN) - Madhur", lang: "Hindi (India)", gender: "Male", sample: "फातिमा वॉइस स्टूडियो में आपका स्वागत है।" },
-            { id: "ar-SA-AminaNeural", name: "Arabic (SA) - Amina", lang: "Arabic (Saudi)", gender: "Female", sample: "مرحبًا بكم في استوديو فاطمة الصوتي." },
-            { id: "ar-SA-HamedNeural", name: "Arabic (SA) - Hamed", lang: "Arabic (Saudi)", gender: "Male", sample: "مرحبًا بكم في استوديو فاطمة الصوتي." },
-            { id: "bn-BD-NabanitaNeural", name: "Bengali (BD) - Nabanita", lang: "Bengali (BD)", gender: "Female", sample: "ফাতিমা ভয়েস স্টুডিওতে আপনাকে স্বাগতম।" },
-            { id: "bn-BD-PradeepNeural", name: "Bengali (BD) - Pradeep", lang: "Bengali (BD)", gender: "Male", sample: "ফাতিমা ভয়েস স্টুডিওতে আপনাকে স্বাগতম।" },
-            { id: "zh-CN-XiaoxiaoNeural", name: "Chinese - Xiaoxiao", lang: "Chinese", gender: "Female", sample: "欢迎来到法蒂玛语音工作室。" },
-            { id: "zh-CN-YunxiNeural", name: "Chinese - Yunxi", lang: "Chinese", gender: "Male", sample: "欢迎来到法蒂玛语音工作室。" },
-            { id: "fr-FR-DeniseNeural", name: "French (FR) - Denise", lang: "French", gender: "Female", sample: "Bienvenue au studio vocal Fatima." },
-            { id: "fr-FR-HenriNeural", name: "French (FR) - Henri", lang: "French", gender: "Male", sample: "Bienvenue au studio vocal Fatima." },
-            { id: "de-DE-KatjaNeural", name: "German (DE) - Katja", lang: "German", gender: "Female", sample: "Willkommen im Fatima Sprachstudio." },
-            { id: "de-DE-ConradNeural", name: "German (DE) - Conrad", lang: "German", gender: "Male", sample: "Willkommen im Fatima Sprachstudio." },
-            { id: "id-ID-GisellaNeural", name: "Indonesian - Gisella", lang: "Indonesian", gender: "Female", sample: "Selamat datang di Studio Suara Fatima." },
-            { id: "id-ID-ArdiNeural", name: "Indonesian - Ardi", lang: "Indonesian", gender: "Male", sample: "Selamat datang di Studio Suara Fatima." },
-            { id: "it-IT-ElsaNeural", name: "Italian (IT) - Elsa", lang: "Italian", gender: "Female", sample: "Benvenuti nello studio vocale Fatima." },
-            { id: "it-IT-DiegoNeural", name: "Italian (IT) - Diego", lang: "Italian", gender: "Male", sample: "Benvenuti nello studio vocale Fatima." },
-            { id: "ja-JP-NanamiNeural", name: "Japanese - Nanami", lang: "Japanese", gender: "Female", sample: "ファティマ音声スタジオへようこそ。" },
-            { id: "ja-JP-KeitaNeural", name: "Japanese - Keita", lang: "Japanese", gender: "Male", sample: "ファティマ音声スタジオへようこそ。" },
-            { id: "ms-MY-YasminNeural", name: "Malay (MY) - Yasmin", lang: "Malay", gender: "Female", sample: "Selamat datang ke Studio Suara Fatima." },
-            { id: "ms-MY-OsmanNeural", name: "Malay (MY) - Osman", lang: "Malay", gender: "Male", sample: "Selamat datang ke Studio Suara Fatima." },
-            { id: "pt-BR-FranciscaNeural", name: "Portuguese - Francisca", lang: "Portuguese", gender: "Female", sample: "Bem-vindo ao estúdio de voz Fatima." },
-            { id: "pt-BR-AntonioNeural", name: "Portuguese - Antonio", lang: "Portuguese", gender: "Male", sample: "Bem-vindo ao estúdio de voz Fatima." },
-            { id: "ru-RU-SvetlanaNeural", name: "Russian - Svetlana", lang: "Russian", gender: "Female", sample: "Добро пожаловать в голосовую студию Фатима." },
-            { id: "ru-RU-DmitryNeural", name: "Russian - Dmitry", lang: "Russian", gender: "Male", sample: "Добро пожаловать в голосовую студию Фатима." },
-            { id: "es-ES-ElviraNeural", name: "Spanish (ES) - Elvira", lang: "Spanish", gender: "Female", sample: "Bienvenido al estudio de voz Fatima." },
-            { id: "es-ES-AlvaroNeural", name: "Spanish (ES) - Alvaro", lang: "Spanish", gender: "Male", sample: "Bienvenido al estudio de voz Fatima." }
+        const voices = [
+            // Urdu (Pakistan & India)
+            { id: "ur-PK-UzmaNeural", name: "Urdu (PK) - Uzma [Female]", lang: "ur" },
+            { id: "ur-PK-AsadNeural", name: "Urdu (PK) - Asad [Male]", lang: "ur" },
+            { id: "ur-IN-GulNeural", name: "Urdu (IN) - Gul [Female]", lang: "ur" },
+            { id: "ur-IN-SalmanNeural", name: "Urdu (IN) - Salman [Male]", lang: "ur" },
+            
+            // Hindi (India)
+            { id: "hi-IN-SwaraNeural", name: "Hindi (IN) - Swara [Female]", lang: "hi" },
+            { id: "hi-IN-MadhurNeural", name: "Hindi (IN) - Madhur [Male]", lang: "hi" },
+
+            // English (US)
+            { id: "en-US-SteffanNeural", name: "English (US) - Steffan [Male - Premium]", lang: "en" },
+            { id: "en-US-AriaNeural", name: "English (US) - Aria [Female]", lang: "en" },
+            { id: "en-US-GuyNeural", name: "English (US) - Guy [Male]", lang: "en" },
+            { id: "en-US-EmmaNeural", name: "English (US) - Emma [Female - Soft]", lang: "en" },
+            { id: "en-US-AndrewNeural", name: "English (US) - Andrew [Male]", lang: "en" },
+            { id: "en-US-AvaNeural", name: "English (US) - Ava [Female]", lang: "en" },
+            { id: "en-US-BrianNeural", name: "English (US) - Brian [Male]", lang: "en" },
+
+            // English (UK / Australia / India)
+            { id: "en-GB-SoniaNeural", name: "English (UK) - Sonia [Female]", lang: "en" },
+            { id: "en-GB-RyanNeural", name: "English (UK) - Ryan [Male]", lang: "en" },
+            { id: "en-GB-LibbyNeural", name: "English (UK) - Libby [Female]", lang: "en" },
+            { id: "en-AU-NatashaNeural", name: "English (AUS) - Natasha [Female]", lang: "en" },
+            { id: "en-AU-WilliamNeural", name: "English (AUS) - William [Male]", lang: "en" },
+            { id: "en-IN-NeerjaNeural", name: "English (IND) - Neerja [Female]", lang: "en" },
+            { id: "en-IN-PrabhatNeural", name: "English (IND) - Prabhat [Male]", lang: "en" },
+
+            // Arabic
+            { id: "ar-SA-ZariyahNeural", name: "Arabic (SA) - Zariyah [Female]", lang: "ar" },
+            { id: "ar-SA-HamedNeural", name: "Arabic (SA) - Hamed [Male]", lang: "ar" },
+            { id: "ar-EG-SalmaNeural", name: "Arabic (EG) - Salma [Female]", lang: "ar" },
+            { id: "ar-AE-FatimaNeural", name: "Arabic (UAE) - Fatima [Female]", lang: "ar" },
+            { id: "ar-AE-HamdanNeural", name: "Arabic (UAE) - Hamdan [Male]", lang: "ar" },
+
+            // Spanish
+            { id: "es-ES-ElviraNeural", name: "Spanish (ES) - Elvira [Female]", lang: "es" },
+            { id: "es-ES-AlvaroNeural", name: "Spanish (ES) - Alvaro [Male]", lang: "es" },
+            { id: "es-MX-DaliaNeural", name: "Spanish (MX) - Dalia [Female]", lang: "es" },
+            { id: "es-MX-JorgeNeural", name: "Spanish (MX) - Jorge [Male]", lang: "es" },
+
+            // French
+            { id: "fr-FR-DeniseNeural", name: "French (FR) - Denise [Female]", lang: "fr" },
+            { id: "fr-FR-HenriNeural", name: "French (FR) - Henri [Male]", lang: "fr" },
+
+            // German
+            { id: "de-DE-KatjaNeural", name: "German (DE) - Katja [Female]", lang: "de" },
+            { id: "de-DE-ConradNeural", name: "German (DE) - Conrad [Male]", lang: "de" },
+
+            // Turkish
+            { id: "tr-TR-EmelNeural", name: "Turkish (TR) - Emel [Female]", lang: "tr" },
+            { id: "tr-TR-AhmetNeural", name: "Turkish (TR) - Ahmet [Male]", lang: "tr" },
+
+            // Persian
+            { id: "fa-IR-DilaraNeural", name: "Persian (IR) - Dilara [Female]", lang: "fa" },
+            { id: "fa-IR-FaridNeural", name: "Persian (IR) - Farid [Male]", lang: "fa" },
+
+            // Afrikaans
+            { id: "af-ZA-AdriNeural", name: "Afrikaans (ZA) - Adri [Female]", lang: "af" },
+            { id: "af-ZA-WillemNeural", name: "Afrikaans (ZA) - Willem [Male]", lang: "af" },
+
+            // Hebrew
+            { id: "he-IL-HilaNeural", name: "Hebrew (IL) - Hila [Female]", lang: "he" },
+            { id: "he-IL-AvriNeural", name: "Hebrew (IL) - Avri [Male]", lang: "he" }
         ];
 
+        let selectedVoice = "ur-PK-UzmaNeural";
         let favorites = JSON.parse(localStorage.getItem('tts_favorites')) || [];
-        let currentTab = 'all';
-        let selectedVoiceId = "ur-PK-UzmaNeural"; // Set fallback voice match
+        let currentlyPlayingVoiceId = null;
+        let generatedFileName = ""; // Globally store unique filename
 
-        function selectVoiceCard(id) {
-            selectedVoiceId = id;
-            renderVoices();
-        }
+        const voicesContainer = document.getElementById('voicesContainer');
+        const generateBtn = document.getElementById('generateBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const scriptText = document.getElementById('scriptText');
+        const searchInput = document.getElementById('searchVoices');
+        const audioPlayerContainer = document.getElementById('audioPlayerContainer');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const silentPreviewPlayer = document.getElementById('silentPreviewPlayer');
+        const downloadBtn = document.getElementById('downloadBtn');
+        
+        // Custom Player Elements
+        const customPlayPauseBtn = document.getElementById('customPlayPauseBtn');
+        const playerSeeker = document.getElementById('playerSeeker');
+        const playerTime = document.getElementById('playerTime');
 
-        function renderVoices() {
-            const container = document.getElementById('voicesContainer');
-            const searchQuery = document.getElementById('searchVoice').value.toLowerCase();
-            container.innerHTML = '';
+        // Render Voice Cards
+        function renderVoices(filterFavorites = false, query = "") {
+            voicesContainer.innerHTML = '';
+            let listToRender = filterFavorites ? voices.filter(v => favorites.includes(v.id)) : voices;
 
-            let filtered = allVoices.filter(v => {
-                const matchesSearch = v.name.toLowerCase().includes(searchQuery) || v.lang.toLowerCase().includes(searchQuery);
-                if (currentTab === 'fav') {
-                    return matchesSearch && favorites.includes(v.id);
-                }
-                return matchesSearch;
-            });
+            if (query.trim() !== "") {
+                listToRender = listToRender.filter(v => 
+                    v.name.toLowerCase().includes(query.toLowerCase()) || 
+                    v.id.toLowerCase().includes(query.toLowerCase())
+                );
+            }
 
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="text-center py-6 text-xs text-gray-600">No voices found matching criteria.</div>`;
+            if (listToRender.length === 0) {
+                voicesContainer.innerHTML = `<div class="text-center text-gray-500 py-10 text-sm">No voices found.</div>`;
                 return;
             }
 
-            filtered.forEach(voice => {
+            listToRender.forEach(voice => {
+                const isSelected = voice.id === selectedVoice;
                 const isFav = favorites.includes(voice.id);
-                const isSelected = voice.id === selectedVoiceId;
-                const item = document.createElement('div');
-                
-                item.className = `flex items-center justify-between bg-slate-950/40 border border-slate-900 rounded-xl p-3.5 cursor-pointer transition-all ${isSelected ? 'selected-voice-card' : 'hover:border-purple-900/40'}`;
-                item.setAttribute('onclick', `selectVoiceCard('${voice.id}')`);
+                const isPlayingThis = voice.id === currentlyPlayingVoiceId;
 
-                item.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
-                            <i class="fa-solid fa-user text-xs ${isSelected ? 'text-purple-400' : 'text-gray-500'}"></i>
+                const card = document.createElement('div');
+                card.className = `voice-card p-3 rounded-xl flex items-center justify-between cursor-pointer ${isSelected ? 'selected' : 'bg-white/5'}`;
+                card.onclick = () => selectVoice(voice.id);
+
+                const isMale = voice.id.includes('Male') || voice.id.includes('Salman') || voice.id.includes('Madhur') || voice.id.includes('Karan') || voice.id.includes('Guy') || voice.id.includes('Ryan') || voice.id.includes('Hamed') || voice.id.includes('Jorge') || voice.id.includes('Willem') || voice.id.includes('Avri') || voice.id.includes('Steffan') || voice.id.includes('Andrew') || voice.id.includes('Brian') || voice.id.includes('William') || voice.id.includes('Prabhat') || voice.id.includes('Hamdan') || voice.id.includes('Alvaro') || voice.id.includes('Henri') || voice.id.includes('Conrad') || voice.id.includes('Ahmet') || voice.id.includes('Farid');
+
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                            <i class="fa-solid ${isMale ? 'fa-user-tie' : 'fa-user'}"></i>
                         </div>
                         <div>
-                            <h4 class="text-xs font-bold text-gray-200">${voice.name}</h4>
-                            <p class="text-[10px] text-gray-500">[${voice.lang} - ${voice.gender}]</p>
+                            <p class="text-xs font-medium text-white">${voice.name}</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2" onclick="event.stopPropagation();">
-                        <button onclick="playVoice('${voice.id}', this)" class="w-7 h-7 bg-slate-900 border border-slate-800 text-gray-400 hover:text-purple-400 rounded-lg flex items-center justify-center text-xs transition-colors">
-                            <i class="fa-solid fa-play"></i>
+                    <div class="flex items-center space-x-2">
+                        <button id="playBtn-${voice.id}" onclick="event.stopPropagation(); testVoice('${voice.id}')" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-purple-600/30 text-gray-400 hover:text-white flex items-center justify-center transition">
+                            <i class="fa-solid ${isPlayingThis ? 'fa-pause text-purple-400' : 'fa-play text-xs'}"></i>
                         </button>
-                        <button onclick="toggleFavorite('${voice.id}')" class="w-7 h-7 bg-slate-900 border border-slate-800 ${isFav ? 'text-amber-500' : 'text-gray-500'} hover:text-amber-500 rounded-lg flex items-center justify-center text-xs transition-colors">
-                            <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-star"></i>
+                        <button onclick="event.stopPropagation(); toggleFavorite('${voice.id}')" class="w-7 h-7 rounded-lg bg-white/5 text-gray-400 hover:text-yellow-500 flex items-center justify-center transition">
+                            <i class="fa-${isFav ? 'solid' : 'regular'} fa-star ${isFav ? 'text-yellow-500' : ''} text-xs"></i>
                         </button>
                     </div>
                 `;
-                container.appendChild(item);
+                voicesContainer.appendChild(card);
             });
         }
 
-        async function playVoice(voiceId, btnEl) {
-            selectVoiceCard(voiceId);
-            
-            let script = document.getElementById('textScript').value.trim();
-            
-            // Restore zip default: use localized fallback greeting strings if empty
-            if (!script) {
-                const voiceObj = allVoices.find(v => v.id === voiceId);
-                script = voiceObj ? voiceObj.sample : "Welcome";
-            }
-
-            const icon = btnEl.querySelector('i');
-            icon.className = "fa-solid fa-spinner animate-spin text-purple-400";
-
-            try {
-                // RESTORED 100% ORIGINAL BACKEND INTERACTION PIPELINE matching root endpoint URL exactly[span_7](start_span)[span_7](end_span)
-                const response = await fetch('/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({ 'text': script, 'voice': voiceId })
-                });
-                
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = URL.createObjectURL(blob);
-                    const player = document.getElementById('audioPlayer');
-                    player.src = url;
-                    player.play();
-                    
-                    player.onended = () => { icon.className = "fa-solid fa-play"; };
-                } else {
-                    alert("Voice processing workflow failed.");
-                    icon.className = "fa-solid fa-play";
-                }
-            } catch (err) {
-                alert("Network pipeline error.");
-                icon.className = "fa-solid fa-play";
-            }
+        function selectVoice(id) {
+            selectedVoice = id;
+            const currentTab = document.getElementById('favoritesTab').classList.contains('text-white');
+            renderVoices(currentTab, searchInput.value);
         }
 
         function toggleFavorite(id) {
@@ -237,26 +342,221 @@
                 favorites.push(id);
             }
             localStorage.setItem('tts_favorites', JSON.stringify(favorites));
-            renderVoices();
+            const currentTab = document.getElementById('favoritesTab').classList.contains('text-white');
+            renderVoices(currentTab, searchInput.value);
         }
 
-        function filterVoices() {
-            renderVoices();
-        }
+        searchInput.oninput = function() {
+            const currentTab = document.getElementById('favoritesTab').classList.contains('text-white');
+            renderVoices(currentTab, this.value);
+        };
 
-        function switchTab(tab) {
-            currentTab = tab;
-            const tabAll = document.getElementById('tabAll');
-            const tabFav = document.getElementById('tabFav');
+        // Preview sound test
+        async function testVoice(voiceId) {
+            const playIconBtn = document.querySelector(`#playBtn-${voiceId} i`);
 
-            if (tab === 'all') {
-                tabAll.className = "btn-purple text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-600/10 transition-all";
-                tabFav.className = "bg-slate-950 border border-slate-800 text-gray-400 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 hover:text-gray-200 transition-all";
-            } else {
-                tabFav.className = "btn-purple text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-600/10 transition-all";
-                tabAll.className = "bg-slate-950 border border-slate-800 text-gray-400 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 hover:text-gray-200 transition-all";
+            if (currentlyPlayingVoiceId === voiceId) {
+                silentPreviewPlayer.pause();
+                currentlyPlayingVoiceId = null;
+                if (playIconBtn) {
+                    playIconBtn.className = 'fa-solid fa-play text-xs';
+                }
+                return;
             }
-            renderVoices();
+
+            if (currentlyPlayingVoiceId) {
+                const prevPlayIconBtn = document.querySelector(`#playBtn-${currentlyPlayingVoiceId} i`);
+                if (prevPlayIconBtn) prevPlayIconBtn.className = 'fa-solid fa-play text-xs';
+            }
+
+            try {
+                if (playIconBtn) {
+                    playIconBtn.className = 'fa-solid fa-spinner animate-spin text-xs';
+                }
+
+                const response = await fetch('/preview', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ voice: voiceId })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentlyPlayingVoiceId = voiceId;
+                    silentPreviewPlayer.src = data.audio_url;
+                    
+                    if (playIconBtn) {
+                        playIconBtn.className = 'fa-solid fa-pause text-purple-400';
+                    }
+                    silentPreviewPlayer.play();
+                } else {
+                    alert("Preview failed: " + data.error);
+                    if (playIconBtn) playIconBtn.className = 'fa-solid fa-play text-xs';
+                }
+            } catch (err) {
+                alert("Connection error! Please try again.");
+                if (playIconBtn) playIconBtn.className = 'fa-solid fa-play text-xs';
+            }
+        }
+
+        // Silent player listeners
+        silentPreviewPlayer.onended = function() {
+            if (currentlyPlayingVoiceId) {
+                const playIconBtn = document.querySelector(`#playBtn-${currentlyPlayingVoiceId} i`);
+                if (playIconBtn) {
+                    playIconBtn.className = 'fa-solid fa-play text-xs';
+                }
+                currentlyPlayingVoiceId = null;
+            }
+        };
+
+        silentPreviewPlayer.onpause = function() {
+            if (currentlyPlayingVoiceId) {
+                const playIconBtn = document.querySelector(`#playBtn-${currentlyPlayingVoiceId} i`);
+                if (playIconBtn) {
+                    playIconBtn.className = 'fa-solid fa-play text-xs';
+                }
+                currentlyPlayingVoiceId = null;
+            }
+        };
+
+        // Tabs Toggle
+        document.getElementById('allVoicesTab').onclick = function() {
+            this.className = "flex-1 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow";
+            document.getElementById('favoritesTab').className = "flex-1 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white transition";
+            renderVoices(false, searchInput.value);
+        };
+
+        document.getElementById('favoritesTab').onclick = function() {
+            this.className = "flex-1 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow";
+            document.getElementById('allVoicesTab').className = "flex-1 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white transition";
+            renderVoices(true, searchInput.value);
+        };
+
+        // Main Voice Generation Action (Unique file mapping)
+        generateBtn.onclick = async function() {
+            const text = scriptText.value.trim();
+            if (!text) {
+                alert("Pehle koi script likhein!");
+                return;
+            }
+
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-2"></i> Generating...`;
+
+            try {
+                if (currentlyPlayingVoiceId) {
+                    silentPreviewPlayer.pause();
+                }
+
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text, voice: selectedVoice })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update global file name variable with randomized server-side filename
+                    generatedFileName = data.filename;
+                    
+                    audioPlayer.src = data.audio_url;
+                    audioPlayer.load();
+                    
+                    audioPlayer.onloadedmetadata = function() {
+                        audioPlayerContainer.classList.remove('hidden');
+                        playerSeeker.max = Math.floor(audioPlayer.duration);
+                        playerTime.innerText = `0:00 / ${formatTime(audioPlayer.duration)}`;
+                        audioPlayer.play();
+                        customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-pause text-lg"></i>`;
+                    };
+                } else {
+                    alert("Generation failed: " + data.error);
+                }
+            } catch (err) {
+                alert("Server Connection Error! Please try again.");
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Generate Voice`;
+            }
+        };
+
+        // STOP Generation
+        stopBtn.onclick = async function() {
+            try {
+                await fetch('/stop', { method: 'POST' });
+            } catch (e) {}
+
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            silentPreviewPlayer.pause();
+            silentPreviewPlayer.currentTime = 0;
+
+            if (currentlyPlayingVoiceId) {
+                const playIconBtn = document.querySelector(`#playBtn-${currentlyPlayingVoiceId} i`);
+                if (playIconBtn) playIconBtn.className = 'fa-solid fa-play text-xs';
+                currentlyPlayingVoiceId = null;
+            }
+
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Generate Voice`;
+            
+            customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-play text-lg"></i>`;
+            playerSeeker.value = 0;
+            playerTime.innerText = "0:00 / 0:00";
+        };
+
+        // CUSTOM PLAYER INTERFACE LOGIC
+        customPlayPauseBtn.onclick = function() {
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-pause text-lg"></i>`;
+            } else {
+                audioPlayer.pause();
+                customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-play text-lg"></i>`;
+            }
+        };
+
+        // Real-time Smooth Progress Line Update
+        audioPlayer.ontimeupdate = function() {
+            if (audioPlayer.duration) {
+                playerSeeker.value = Math.floor(audioPlayer.currentTime);
+                playerTime.innerText = `${formatTime(audioPlayer.currentTime)} / ${formatTime(audioPlayer.duration)}`;
+            }
+        };
+
+        // Drag/Click seeker bar
+        playerSeeker.oninput = function() {
+            audioPlayer.currentTime = playerSeeker.value;
+        };
+
+        // Reset player UI state when audio ends
+        audioPlayer.onended = function() {
+            customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-play text-lg"></i>`;
+            playerSeeker.value = 0;
+        };
+
+        // Dynamic Randomized File Download Action
+        downloadBtn.onclick = function() {
+            if (audioPlayer.src && generatedFileName) {
+                const link = document.createElement('a');
+                link.href = audioPlayer.src;
+                // Seed custom randomized filename into the browser native download process
+                link.download = generatedFileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert("Pehle koi voice generate karein!");
+            }
+        };
+
+        // Helper time formatter
+        function formatTime(secs) {
+            if (isNaN(secs)) return "0:00";
+            const minutes = Math.floor(secs / 60);
+            const seconds = Math.floor(secs % 60);
+            return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
 
         // AdSense Integration Data Array Configuration
@@ -292,9 +592,7 @@
             if (event.target == m) m.classList.add('hidden');
         }
 
-        window.onload = function() {
-            renderVoices();
-        };
+        renderVoices();
     </script>
 </body>
 </html>
