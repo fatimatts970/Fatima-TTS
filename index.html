@@ -243,21 +243,21 @@
         <div class="w-full max-w-lg bg-white text-slate-800 rounded-3xl p-6 md:p-8 shadow-xl mb-8">
             <h1 id="subPageTitle" class="text-2xl font-black text-slate-950 mb-4 border-b border-slate-100 pb-3 uppercase tracking-wide"></h1>
             <div id="subPageContent" class="text-xs md:text-sm text-slate-600 space-y-4 leading-relaxed">
-                <!-- Text contents loaded dynamically via safe system cache array -->
+                <!-- Text contents loaded dynamically -->
             </div>
         </div>
     </div>
 
     <!-- ================= ADSENSE COMPLIANT MAPPED FOOTER LINKS ================= -->
     <footer class="w-full max-w-lg text-center py-6 border-t border-white/20 text-xs text-white/60 space-x-3 relative z-10">
-        <!-- Secure Multi-Tab Verification Engine mapped to direct dynamic paths -->
-        <a href="/about" onclick="openPolicyViewInTab(event, 'about')" class="hover:text-white transition-colors">About Us</a>
+        <!-- Hash parameters ensure new tab loads index.html layout without throwing server 404 -->
+        <a href="/#/about" class="hover:text-white transition-colors">About Us</a>
         <span>•</span>
-        <a href="/privacy" onclick="openPolicyViewInTab(event, 'privacy')" class="hover:text-white transition-colors">Privacy Policy</a>
+        <a href="/#/privacy" class="hover:text-white transition-colors">Privacy Policy</a>
         <span>•</span>
-        <a href="/terms" onclick="openPolicyViewInTab(event, 'terms')" class="hover:text-white transition-colors">Terms & Conditions</a>
+        <a href="/#/terms" class="hover:text-white transition-colors">Terms & Conditions</a>
         <span>•</span>
-        <a href="/contact" onclick="openPolicyViewInTab(event, 'contact')" class="hover:text-white transition-colors">Contact Us</a>
+        <a href="/#/contact" class="hover:text-white transition-colors">Contact Us</a>
         
         <p class="text-[10px] text-white/40 mt-4">&copy; 2026 Fatima TTS Studio. All rights reserved.</p>
     </footer>
@@ -401,30 +401,19 @@
             }
         };
 
-        // ================= THE NATIVE CROSS-TAB ROUTE SYNC GENERATOR =================
-        function openPolicyViewInTab(event, pageKey) {
-            event.preventDefault();
-            
-            // Check if user is already inside an isolated tab window configuration framework
-            if (window.name === `tts_${pageKey}_session`) {
-                renderSubRoutePageHTML(pageKey);
-                return;
+        // ================= DYNAMIC ROUTE HASH ROUTER HANDLING ENGINE =================
+        function checkHashRoute() {
+            const hash = window.location.hash;
+            if (hash.startsWith('#/')) {
+                const pageKey = hash.replace('#/', '');
+                if (comprehensiveDataDocs[pageKey]) {
+                    renderSubRoutePageHTML(pageKey);
+                    return;
+                }
             }
-
-            const cleanTargetUrl = event.currentTarget.getAttribute('href');
-            
-            // Open a true clean separate window tab mapping the real domain URL pathway path parameters
-            const remoteWindow = window.open(cleanTargetUrl, `tts_${pageKey}_session`);
-            
-            if (remoteWindow) {
-                // Safely broadcast structural code setup text configurations inside the target context
-                remoteWindow.addEventListener('load', function() {
-                    localStorage.setItem(`tts_route_trigger`, pageKey);
-                    if (typeof remoteWindow.eval === 'function') {
-                        remoteWindow.location.reload(); 
-                    }
-                });
-            }
+            // Defers back to home standard layout if no structural conditions match
+            document.getElementById('subPagePolicyView').classList.add('hidden');
+            document.getElementById('mainStudioAppView').classList.remove('hidden');
         }
 
         function renderSubRoutePageHTML(key) {
@@ -436,24 +425,12 @@
         }
 
         function closeSubRoutePage() {
-            localStorage.removeItem('tts_route_trigger');
-            window.history.replaceState({}, "", "/");
-            document.getElementById('subPagePolicyView').classList.add('hidden');
-            document.getElementById('mainStudioAppView').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.location.hash = '';
         }
 
-        // Automated self-healing configuration check to capture data payloads from localized routing requests
-        window.addEventListener('DOMContentLoaded', () => {
-            const currentPath = window.location.pathname.replace('/', '');
-            const cacheTrigger = localStorage.getItem('tts_route_trigger');
-            
-            const activeKey = ['about', 'privacy', 'terms', 'contact'].includes(currentPath) ? currentPath : cacheTrigger;
-            
-            if (activeKey && ['about', 'privacy', 'terms', 'contact'].includes(activeKey)) {
-                renderSubRoutePageHTML(activeKey);
-            }
-        });
+        // Monitors clean dynamic window frame switches instantly
+        window.addEventListener('hashchange', checkHashRoute);
+        window.addEventListener('DOMContentLoaded', checkHashRoute);
 
         // Core App Render Loops (Keeps all calculations intact)
         function renderVoices() {
