@@ -39,11 +39,6 @@
             <textarea id="textScript" placeholder="Apni script yahan likhein..." 
                       class="w-full h-32 bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-purple-500 placeholder-gray-600 resize-none transition-all"></textarea>
             
-            <!-- Hidden original select element that your backend architecture uses[span_2](start_span)[span_2](end_span) -->
-            <select id="voiceSelect" class="hidden">
-                <!-- Syncs perfectly with dynamic list cards -->
-            </select>
-
             <!-- Quick View Mode Filter State Selector Tabs -->
             <div class="grid grid-cols-2 gap-2 mt-4">
                 <button id="tabAll" onclick="switchTab('all')" class="btn-purple text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-600/10 transition-all">
@@ -98,7 +93,7 @@
     </div>
 
     <script>
-        // Original 35 premium voice list dataset from zip layout analysis[span_3](start_span)[span_3](end_span)
+        // Restored EXACT voice definitions and IDs from your original code file analysis[span_6](start_span)[span_6](end_span)
         const allVoices = [
             { id: "ur-PK-UzmaNeural", name: "Urdu (PK) - Uzma", lang: "Urdu (Pakistan)", gender: "Female", sample: "فاطمہ سٹوڈیو میں آپ کا خوش آمدید" },
             { id: "ur-PK-AsadNeural", name: "Urdu (PK) - Asad", lang: "Urdu (Pakistan)", gender: "Male", sample: "فاطمہ سٹوڈیو میں آپ کا خوش آمدید" },
@@ -114,7 +109,7 @@
             { id: "ar-SA-AminaNeural", name: "Arabic (SA) - Amina", lang: "Arabic (Saudi)", gender: "Female", sample: "مرحبًا بكم في استوديو فاطمة الصوتي." },
             { id: "ar-SA-HamedNeural", name: "Arabic (SA) - Hamed", lang: "Arabic (Saudi)", gender: "Male", sample: "مرحبًا بكم في استوديو فاطمة الصوتي." },
             { id: "bn-BD-NabanitaNeural", name: "Bengali (BD) - Nabanita", lang: "Bengali (BD)", gender: "Female", sample: "ফাতিমা ভয়েস স্টুডিওতে আপনাকে স্বাগতম।" },
-            { id: "bn-BD-PradeepNeural", name: "Bengali (BD) - Pradeep", lang: "Bengali (BD)", gender: "Male", sample: "ফাতিমা ভয়েס স্টুডিওতে আপনাকে স্বাগতম।" },
+            { id: "bn-BD-PradeepNeural", name: "Bengali (BD) - Pradeep", lang: "Bengali (BD)", gender: "Male", sample: "ফাতিমা ভয়েস স্টুডিওতে আপনাকে স্বাগতম।" },
             { id: "zh-CN-XiaoxiaoNeural", name: "Chinese - Xiaoxiao", lang: "Chinese", gender: "Female", sample: "欢迎来到法蒂玛语音工作室。" },
             { id: "zh-CN-YunxiNeural", name: "Chinese - Yunxi", lang: "Chinese", gender: "Male", sample: "欢迎来到法蒂玛语音工作室。" },
             { id: "fr-FR-DeniseNeural", name: "French (FR) - Denise", lang: "French", gender: "Female", sample: "Bienvenue au studio vocal Fatima." },
@@ -139,24 +134,10 @@
 
         let favorites = JSON.parse(localStorage.getItem('tts_favorites')) || [];
         let currentTab = 'all';
-        let selectedVoiceId = "ur-PK-UzmaNeural"; // Default initialization[span_4](start_span)[span_4](end_span)
-
-        // Populates hidden select dropdown exactly like original zip system requirement[span_5](start_span)[span_5](end_span)
-        function initSelectOptions() {
-            const select = document.getElementById('voiceSelect');
-            select.innerHTML = '';
-            allVoices.forEach(voice => {
-                const opt = document.createElement('option');
-                opt.value = voice.id;
-                opt.innerText = voice.name;
-                select.appendChild(opt);
-            });
-            select.value = selectedVoiceId;
-        }
+        let selectedVoiceId = "ur-PK-UzmaNeural"; // Set fallback voice match
 
         function selectVoiceCard(id) {
             selectedVoiceId = id;
-            document.getElementById('voiceSelect').value = id; // Update hidden standard selector logic[span_6](start_span)[span_6](end_span)
             renderVoices();
         }
 
@@ -183,7 +164,6 @@
                 const isSelected = voice.id === selectedVoiceId;
                 const item = document.createElement('div');
                 
-                // Clicking anywhere on card handles selection state updates perfectly[span_7](start_span)[span_7](end_span)
                 item.className = `flex items-center justify-between bg-slate-950/40 border border-slate-900 rounded-xl p-3.5 cursor-pointer transition-all ${isSelected ? 'selected-voice-card' : 'hover:border-purple-900/40'}`;
                 item.setAttribute('onclick', `selectVoiceCard('${voice.id}')`);
 
@@ -211,12 +191,11 @@
         }
 
         async function playVoice(voiceId, btnEl) {
-            // First select the voice item instantly
             selectVoiceCard(voiceId);
             
             let script = document.getElementById('textScript').value.trim();
             
-            // Zip standard logic: Use default string localized array variables if text block remains blank
+            // Restore zip default: use localized fallback greeting strings if empty
             if (!script) {
                 const voiceObj = allVoices.find(v => v.id === voiceId);
                 script = voiceObj ? voiceObj.sample : "Welcome";
@@ -226,11 +205,11 @@
             icon.className = "fa-solid fa-spinner animate-spin text-purple-400";
 
             try {
-                // FIXED backend tracking endpoint matching your live Flask app structure precisely[span_8](start_span)[span_8](end_span)
-                const response = await fetch('/generate', {
+                // RESTORED 100% ORIGINAL BACKEND INTERACTION PIPELINE matching root endpoint URL exactly[span_7](start_span)[span_7](end_span)
+                const response = await fetch('/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: script, voice: voiceId })
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ 'text': script, 'voice': voiceId })
                 });
                 
                 if (response.ok) {
@@ -246,7 +225,7 @@
                     icon.className = "fa-solid fa-play";
                 }
             } catch (err) {
-                alert("Network pipeline execution error.");
+                alert("Network pipeline error.");
                 icon.className = "fa-solid fa-play";
             }
         }
@@ -314,7 +293,6 @@
         }
 
         window.onload = function() {
-            initSelectOptions();
             renderVoices();
         };
     </script>
