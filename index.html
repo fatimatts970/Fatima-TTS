@@ -129,7 +129,7 @@
         <div class="flex space-x-3 mb-6 relative z-10">
             <button id="generateBtn" class="flex-2 w-3/4 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-purple-600/20 transition duration-300 flex items-center justify-center">
                 <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
-                <span id="generateBtnText">Generate Voice</span>
+                <span>Generate Voice</span>
             </button>
             <button id="stopBtn" class="flex-1 w-1/4 py-4 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 text-red-400 font-semibold rounded-xl transition duration-300 flex items-center justify-center">
                 Stop
@@ -263,12 +263,9 @@
         let favorites = JSON.parse(localStorage.getItem('tts_favorites')) || [];
         let currentlyPlayingVoiceId = null;
         let generatedFileName = ""; // Globally store unique filename
-        let countdownInterval = null; // Track explicit countdown ticks
 
         const voicesContainer = document.getElementById('voicesContainer');
         const generateBtn = document.getElementById('generateBtn');
-        const generateBtnText = document.getElementById('generateBtnText');
-        const stopBtn = document.getElementById('stopBtn');
         const scriptText = document.getElementById('scriptText');
         const searchInput = document.getElementById('searchVoices');
         const audioPlayerContainer = document.getElementById('audioPlayerContainer');
@@ -435,14 +432,6 @@
             renderVoices(true, searchInput.value);
         };
 
-        // Clear countdown function helper
-        function clearCountdown() {
-            if (countdownInterval) {
-                clearInterval(countdownInterval);
-                countdownInterval = null;
-            }
-        }
-
         // Main Voice Generation Action (Unique file mapping)
         generateBtn.onclick = async function() {
             const text = scriptText.value.trim();
@@ -452,22 +441,7 @@
             }
 
             generateBtn.disabled = true;
-            clearCountdown();
-
-            // Original 10000% Working Real-Time Countdown implementation based on script string text blocks
-            let timeLeft = Math.max(3, Math.min(15, Math.ceil(text.length / 25))); 
-            generateBtnText.innerText = `Generating (${timeLeft}s)...`;
-            generateBtn.querySelector('i').className = "fa-solid fa-spinner animate-spin mr-2";
-
-            countdownInterval = setInterval(() => {
-                timeLeft--;
-                if (timeLeft > 0) {
-                    generateBtnText.innerText = `Generating (${timeLeft}s)...`;
-                } else {
-                    generateBtnText.innerText = `Processing...`;
-                    clearCountdown();
-                }
-            }, 1000);
+            generateBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-2"></i> Generating...`;
 
             try {
                 if (currentlyPlayingVoiceId) {
@@ -501,16 +475,13 @@
             } catch (err) {
                 alert("Server Connection Error! Please try again.");
             } finally {
-                clearCountdown();
                 generateBtn.disabled = false;
-                generateBtn.querySelector('i').className = "fa-solid fa-wand-magic-sparkles mr-2";
-                generateBtnText.innerText = `Generate Voice`;
+                generateBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Generate Voice`;
             }
         };
 
         // STOP Generation
         stopBtn.onclick = async function() {
-            clearCountdown();
             try {
                 await fetch('/stop', { method: 'POST' });
             } catch (e) {}
@@ -527,8 +498,7 @@
             }
 
             generateBtn.disabled = false;
-            generateBtn.querySelector('i').className = "fa-solid fa-wand-magic-sparkles mr-2";
-            generateBtnText.innerText = `Generate Voice`;
+            generateBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Generate Voice`;
             
             customPlayPauseBtn.innerHTML = `<i class="fa-solid fa-play text-lg"></i>`;
             playerSeeker.value = 0;
