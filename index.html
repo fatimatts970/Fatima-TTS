@@ -10,6 +10,11 @@
         body { background-color: #0b0f19; }
         .custom-card { background-color: #111827; border: 1px solid #1f2937; }
         .btn-purple { background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); }
+        /* Custom Scrollbar for Voice List */
+        .voice-list-scroll::-webkit-scrollbar { width: 6px; }
+        .voice-list-scroll::-webkit-scrollbar-track { background: #0f172a; border-radius: 8px; }
+        .voice-list-scroll::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 8px; }
+        .voice-list-scroll::-webkit-scrollbar-thumb:hover { background: #374151; }
     </style>
 </head>
 <body class="text-gray-200 font-sans min-h-screen flex flex-col items-center p-4">
@@ -22,7 +27,7 @@
         <h1 class="text-2xl font-black tracking-wider text-white">Fatima TTS</h1>
         <p class="text-xs uppercase tracking-widest text-purple-400 font-bold mt-1">Premium Voice Studio</p>
         <div class="mt-3 bg-slate-900/80 border border-slate-800 rounded-full px-4 py-1 flex items-center gap-2 text-[11px] text-amber-400 font-medium">
-            <i class="fa-solid fa-bolt text-xs"></i> Total 35 Premium Global Voices Active Hain!
+            <i class="fa-solid fa-bolt text-xs"></i> Total <span id="voiceCount">0</span> Premium Global Voices Active Hain!
         </div>
     </div>
 
@@ -36,10 +41,10 @@
             
             <!-- Quick View Mode Filter State Selector Tabs -->
             <div class="grid grid-cols-2 gap-2 mt-4">
-                <button class="btn-purple text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-600/10">
+                <button id="tabAll" onclick="switchTab('all')" class="btn-purple text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-600/10 transition-all">
                     <i class="fa-solid fa-microphone text-xs"></i> All Voices
                 </button>
-                <button class="bg-slate-950 border border-slate-800 text-gray-400 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 hover:text-gray-200 transition-colors">
+                <button id="tabFav" onclick="switchTab('fav')" class="bg-slate-950 border border-slate-800 text-gray-400 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 hover:text-gray-200 transition-all">
                     <i class="fa-solid fa-star text-xs text-amber-500"></i> Favorites
                 </button>
             </div>
@@ -49,67 +54,19 @@
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-600">
                     <i class="fa-solid fa-magnifying-glass text-xs"></i>
                 </span>
-                <input type="text" id="searchVoice" placeholder="Search language or voice..." 
+                <input type="text" id="searchVoice" oninput="filterVoices()" placeholder="Search language or voice..." 
                        class="w-full bg-slate-950/80 border border-slate-800 rounded-xl py-2.5 pl-9 pr-4 text-xs text-white focus:outline-none focus:border-purple-500 placeholder-gray-600 transition-all">
             </div>
         </div>
 
         <!-- Dynamic Output Stream Active List Wrapper -->
-        <div class="custom-card rounded-2xl p-4 shadow-xl space-y-2 max-h-[40vh] overflow-y-auto">
-            
-            <!-- Voice Track Item 1 -->
-            <div class="flex items-center justify-between bg-slate-950/40 border border-slate-900 rounded-xl p-3.5 hover:border-purple-900/40 transition-all">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
-                        <i class="fa-solid fa-user text-xs text-purple-400"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-xs font-bold text-gray-200">Urdu (PK) - Uzma</h4>
-                        <p class="text-[10px] text-gray-500">[Female]</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button class="w-7 h-7 bg-slate-900 border border-slate-800 text-gray-400 hover:text-purple-400 rounded-lg flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-play"></i></button>
-                    <button class="w-7 h-7 bg-slate-900 border border-slate-800 text-gray-500 hover:text-amber-500 rounded-lg flex items-center justify-center text-xs transition-colors"><i class="fa-regular fa-star"></i></button>
-                </div>
-            </div>
-
-            <!-- Voice Track Item 2 -->
-            <div class="flex items-center justify-between bg-slate-950/40 border border-slate-900 rounded-xl p-3.5 hover:border-purple-900/40 transition-all">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
-                        <i class="fa-solid fa-user text-xs text-purple-400"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-xs font-bold text-gray-200">Urdu (PK) - Asad</h4>
-                        <p class="text-[10px] text-gray-500">[Male]</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button class="w-7 h-7 bg-slate-900 border border-slate-800 text-gray-400 hover:text-purple-400 rounded-lg flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-play"></i></button>
-                    <button class="w-7 h-7 bg-slate-900 border border-slate-800 text-gray-500 hover:text-amber-500 rounded-lg flex items-center justify-center text-xs transition-colors"><i class="fa-regular fa-star"></i></button>
-                </div>
-            </div>
-
-            <!-- Voice Track Item 3 -->
-            <div class="flex items-center justify-between bg-slate-950/40 border border-slate-900 rounded-xl p-3.5 hover:border-purple-900/40 transition-all">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
-                        <i class="fa-solid fa-user text-xs text-purple-400"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-xs font-bold text-gray-200">Urdu (IN) - Gul</h4>
-                        <p class="text-[10px] text-gray-500">[Female]</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button class="w-7 h-7 bg-slate-900 border border-slate-800 text-gray-400 hover:text-purple-400 rounded-lg flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-play"></i></button>
-                    <button class="w-7 h-7 bg-slate-900 border border-slate-800 text-gray-500 hover:text-amber-500 rounded-lg flex items-center justify-center text-xs transition-colors"><i class="fa-regular fa-star"></i></button>
-                </div>
-            </div>
-
+        <div id="voicesContainer" class="custom-card rounded-2xl p-4 shadow-xl space-y-2 max-h-[40vh] overflow-y-auto voice-list-scroll">
+            <!-- Loaded dynamically from your backend array -->
         </div>
     </div>
+
+    <!-- Hidden Audio Player Core -->
+    <audio id="audioPlayer" class="hidden"></audio>
 
     <!-- ================= PREMIUM ADSENSE PAGES SECTION ================= -->
     <footer class="w-full max-w-md text-center py-6 mt-8 border-t border-slate-800/60 text-xs text-gray-500 space-x-3">
@@ -122,7 +79,7 @@
         <button onclick="openPolicy('contact')" class="hover:text-purple-400 transition-colors">Contact Us</button>
     </footer>
 
-    <!-- Dynamic Modal System (No Redirection, 0% Routing Error) -->
+    <!-- Dynamic Modal System -->
     <div id="policyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl max-h-[80vh] flex flex-col shadow-2xl">
             <div class="p-4 border-b border-slate-800 flex justify-between items-center">
@@ -130,12 +87,140 @@
                 <button onclick="closePolicy()" class="text-gray-400 hover:text-white text-lg font-bold">&times;</button>
             </div>
             <div id="modalContent" class="p-5 overflow-y-auto text-xs text-gray-400 space-y-3 leading-relaxed">
-                <!-- Text contents inject dynamic here -->
+                <!-- Data Content -->
             </div>
         </div>
     </div>
 
+    <!-- Your Full Restored Core Logic Script[span_1](start_span)[span_1](end_span) -->
     <script>
+        let allVoices = [];
+        let favorites = JSON.parse(localStorage.getItem('tts_favorites')) || [];
+        let currentTab = 'all';
+
+        // Load voices dynamically on start from backend pipeline[span_2](start_span)[span_2](end_span)
+        async function loadVoices() {
+            try {
+                const response = await fetch('/api/voices');
+                allVoices = await response.json();
+                document.getElementById('voiceCount').innerText = allVoices.length;
+                renderVoices();
+            } catch (err) {
+                console.error("Error loading original voice array setup.");
+            }
+        }
+
+        function renderVoices() {
+            const container = document.getElementById('voicesContainer');
+            const searchQuery = document.getElementById('searchVoice').value.toLowerCase();
+            container.innerHTML = '';
+
+            let filtered = allVoices.filter(v => {
+                const matchesSearch = v.name.toLowerCase().includes(searchQuery) || v.lang.toLowerCase().includes(searchQuery);
+                if (currentTab === 'fav') {
+                    return matchesSearch && favorites.includes(v.id);
+                }
+                return matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="text-center py-6 text-xs text-gray-600">No voices found matching criteria.</div>`;
+                return;
+            }
+
+            filtered.forEach(voice => {
+                const isFav = favorites.includes(voice.id);
+                const item = document.createElement('div');
+                item.className = "flex items-center justify-between bg-slate-950/40 border border-slate-900 rounded-xl p-3.5 hover:border-purple-900/40 transition-all";
+                
+                item.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
+                            <i class="fa-solid fa-user text-xs text-purple-400"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-200">${voice.name}</h4>
+                            <p class="text-[10px] text-gray-500">[${voice.lang} - ${voice.gender}]</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="playVoice('${voice.id}', this)" class="w-7 h-7 bg-slate-900 border border-slate-800 text-gray-400 hover:text-purple-400 rounded-lg flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <button onclick="toggleFavorite('${voice.id}')" class="w-7 h-7 bg-slate-900 border border-slate-800 ${isFav ? 'text-amber-500' : 'text-gray-500'} hover:text-amber-500 rounded-lg flex items-center justify-center text-xs transition-colors">
+                            <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-star"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        async function playVoice(voiceId, btnEl) {
+            const script = document.getElementById('textScript').value.trim();
+            if (!script) {
+                alert("Please write your script first!");
+                return;
+            }
+
+            const icon = btnEl.querySelector('i');
+            icon.className = "fa-solid fa-spinner animate-spin text-purple-400";
+
+            try {
+                const response = await fetch('/api/tts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: script, voice: voiceId })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const player = document.getElementById('audioPlayer');
+                    player.src = url;
+                    player.play();
+                    
+                    player.onended = () => { icon.className = "fa-solid fa-play"; };
+                } else {
+                    alert("Voice processing workflow failed.");
+                    icon.className = "fa-solid fa-play";
+                }
+            } catch (err) {
+                alert("Network pipeline execution error.");
+                icon.className = "fa-solid fa-play";
+            }
+        }
+
+        function toggleFavorite(id) {
+            if (favorites.includes(id)) {
+                favorites = favorites.filter(favId => favId !== id);
+            } else {
+                favorites.push(id);
+            }
+            localStorage.setItem('tts_favorites', JSON.stringify(favorites));
+            renderVoices();
+        }
+
+        function filterVoices() {
+            renderVoices();
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            const tabAll = document.getElementById('tabAll');
+            const tabFav = document.getElementById('tabFav');
+
+            if (tab === 'all') {
+                tabAll.className = "btn-purple text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-600/10 transition-all";
+                tabFav.className = "bg-slate-950 border border-slate-800 text-gray-400 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 hover:text-gray-200 transition-all";
+            } else {
+                tabFav.className = "btn-purple text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-600/10 transition-all";
+                tabAll.className = "bg-slate-950 border border-slate-800 text-gray-400 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 hover:text-gray-200 transition-all";
+            }
+            renderVoices();
+        }
+
+        // AdSense Dynamic Pages Layout Configuration
         const pageData = {
             about: {
                 title: "About Us",
@@ -151,7 +236,7 @@
             },
             contact: {
                 title: "Contact Us",
-                content: "<p>Have questions, business inquiries, or technical feedback regarding Fatima TTS? Reach out directly via our official channel infrastructure.</p><p><strong>Email support:</strong> contact.fatimatts@gmail.com</p><p>We value user input and aim to respond within 24 to 48 standard tracking hours.</p>"
+                content: "<p>Have questions, business inquiries, or technical feedback regarding Fatima TTS? Reach out directly via our official channel infrastructure.</p><p><strong>Email support:</strong> anjaanshahzadi27@gmail.com</p><p>We value user input and aim to respond within 24 to 48 standard tracking hours.</p>"
             }
         };
 
@@ -167,6 +252,9 @@
             let m = document.getElementById('policyModal');
             if (event.target == m) m.classList.add('hidden');
         }
+
+        // Initialize original lifecycle hook[span_3](start_span)[span_3](end_span)
+        window.onload = loadVoices;
     </script>
 </body>
 </html>
