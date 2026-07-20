@@ -29,6 +29,7 @@ ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 # ---------- Upstash Redis helper ----------
 def redis_command(*args):
     if not UPSTASH_URL or not UPSTASH_TOKEN:
+        print("REDIS_DEBUG: URL or TOKEN missing!")
         return None
     try:
         resp = requests.post(
@@ -39,7 +40,8 @@ def redis_command(*args):
         )
         resp.raise_for_status()
         return resp.json().get("result")
-    except Exception:
+    except Exception as e:
+        print(f"REDIS_DEBUG: command={args[0] if args else '?'} error={e}")
         return None
 
 
