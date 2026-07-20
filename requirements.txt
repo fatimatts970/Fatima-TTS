@@ -1,3 +1,4 @@
 flask
 edge-tts
 gunicorn
+requests
