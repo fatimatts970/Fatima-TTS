@@ -996,7 +996,11 @@
 
         // Live Online Users Counter
         (function(){
-            const sessionId = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2));
+            let sessionId = sessionStorage.getItem('tts_session_id');
+            if (!sessionId) {
+                sessionId = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2));
+                sessionStorage.setItem('tts_session_id', sessionId);
+            }
             const badge = document.getElementById('onlineBadge');
             const countEl = document.getElementById('onlineCount');
             const pluralEl = document.getElementById('onlinePlural');
