@@ -19,6 +19,8 @@
 
     <!-- Tailwind CSS & Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons Link -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -96,6 +98,17 @@
     </style>
 </head>
 <body class="text-white flex flex-col items-center p-4 md:p-8">
+
+    <!-- Live Online Users Badge -->
+    <div id="onlineBadge" class="hidden w-full max-w-lg flex justify-center mb-3 relative z-10">
+        <div class="flex items-center gap-1.5 bg-black/25 border border-white/15 rounded-full px-3 py-1 text-[11px] font-semibold text-white/80">
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
+            </span>
+            Online: <span id="onlineCount">-</span> User<span id="onlinePlural">s</span>
+        </div>
+    </div>
 
     <!-- Top Navigation Header Brand Bar (Corner Logo Style Like TikSav) -->
     <header class="w-full max-w-lg flex items-center justify-between mb-8 px-2 relative z-10">
@@ -700,12 +713,14 @@
                 return;
             }
 
+            const fragment = document.createDocumentFragment();
+
             listToRender.forEach(voice => {
                 if (voice.isSection) {
                     const header = document.createElement('div');
                     header.className = 'pt-3 pb-1 first:pt-0';
                     header.innerHTML = `<p class="text-[11px] font-bold uppercase tracking-widest text-yellow-300/90 px-1">${voice.name}</p>`;
-                    voicesContainer.appendChild(header);
+                    fragment.appendChild(header);
                     return;
                 }
 
@@ -737,8 +752,10 @@
                         </button>
                     </div>
                 `;
-                voicesContainer.appendChild(card);
+                fragment.appendChild(card);
             });
+
+            voicesContainer.appendChild(fragment);
         }
 
         function selectVoice(id) {
@@ -758,9 +775,14 @@
             renderVoices(currentTab, searchInput.value);
         }
 
+        let searchDebounceTimer;
         searchInput.oninput = function() {
-            const currentTab = document.getElementById('favoritesTab').classList.contains('bg-white');
-            renderVoices(currentTab, this.value);
+            clearTimeout(searchDebounceTimer);
+            const val = this.value;
+            searchDebounceTimer = setTimeout(() => {
+                const currentTab = document.getElementById('favoritesTab').classList.contains('bg-white');
+                renderVoices(currentTab, val);
+            }, 150);
         };
 
         // Preview sound test
@@ -971,6 +993,33 @@
             const seconds = Math.floor(secs % 60);
             return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
+
+        // Live Online Users Counter
+        (function(){
+            const sessionId = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2));
+            const badge = document.getElementById('onlineBadge');
+            const countEl = document.getElementById('onlineCount');
+            const pluralEl = document.getElementById('onlinePlural');
+
+            async function pingHeartbeat(){
+                try {
+                    const res = await fetch('/api/heartbeat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ session_id: sessionId })
+                    });
+                    const data = await res.json();
+                    if (data && typeof data.count === 'number') {
+                        countEl.textContent = data.count;
+                        pluralEl.textContent = data.count === 1 ? '' : 's';
+                        badge.classList.remove('hidden');
+                    }
+                } catch (e) { /* silent fail, retry next interval */ }
+            }
+
+            pingHeartbeat();
+            setInterval(pingHeartbeat, 15000);
+        })();
 
         renderVoices();
     </script>
