@@ -348,33 +348,66 @@ details summary::-webkit-details-marker{display:none;}
             <p>Org: {{ v.org or 'Unknown' }}</p>
             <p>ASN: {{ v.asn or 'Unknown' }}</p>
             <p>Reverse DNS: {{ v.reverse_dns or 'N/A' }}</p>
-            <p>Timezone: {{ v.timezone or 'Unknown' }}</p>
+            <p>Timezone (IP): {{ v.timezone or 'Unknown' }}</p>
             <p>Type: {{ 'Hosting/Datacenter' if v.is_hosting else ('Proxy/VPN flagged' if v.is_proxy else 'Residential/Mobile') }}</p>
+            <p>Connection: {{ v.client.connection_type if v.client else 'Unknown' }}</p>
+            <p>HTTP Version: {{ v.http_version or 'Unknown' }}</p>
 
-            <p class="col-span-2 text-white/50 font-bold uppercase text-[10px] mt-1.5">Device &amp; Browser</p>
+            <p class="col-span-2 text-white/50 font-bold uppercase text-[10px] mt-1.5">Device</p>
             <p>OS: {{ v.os or 'Unknown' }}</p>
-            <p>Browser: {{ v.browser or 'Unknown' }}</p>
-            <p>Device: {{ v.device_type or 'Unknown' }}</p>
-            <p>HTTP: {{ v.http_version or 'Unknown' }}</p>
+            <p>Device Type: {{ v.device_type or 'Unknown' }}</p>
             {% if v.client %}
             <p>Screen: {{ v.client.screen_width }}x{{ v.client.screen_height }}</p>
             <p>Viewport: {{ v.client.viewport_width }}x{{ v.client.viewport_height }}</p>
-            <p>CPU cores: {{ v.client.cpu_cores or 'Unknown' }}</p>
-            <p>RAM: {{ v.client.device_memory or 'Unknown' }} GB</p>
-            <p>Touch: {{ 'Yes' if v.client.touch_support else 'No' }}</p>
+            <p>Pixel Ratio: {{ v.client.device_pixel_ratio or 'Unknown' }}</p>
+            <p>Color Depth: {{ v.client.color_depth or 'Unknown' }}-bit</p>
             <p>Orientation: {{ v.client.orientation or 'Unknown' }}</p>
-            <p>Theme: {{ 'Dark' if v.client.prefers_dark else 'Light' }}</p>
-            <p>Connection: {{ v.client.connection_type or 'Unknown' }}</p>
+            <p>Touch Support: {{ 'Yes' if v.client.touch_support else 'No' }}</p>
+            <p>Max Touch Points: {{ v.client.max_touch_points if v.client.max_touch_points is not none else 'Unknown' }}</p>
+            <p>CPU Cores: {{ v.client.cpu_cores or 'Unknown' }}</p>
+            <p>Device Memory: {{ v.client.device_memory ~ ' GB' if v.client.device_memory else 'Unknown' }}</p>
             {% endif %}
 
-            <p class="col-span-2 text-white/50 font-bold uppercase text-[10px] mt-1.5">Locale &amp; Headers</p>
-            <p class="col-span-2">Language: {{ v.accept_language or 'Unknown' }}</p>
+            <p class="col-span-2 text-white/50 font-bold uppercase text-[10px] mt-1.5">Browser &amp; Software</p>
+            <p>Browser: {{ v.browser or 'Unknown' }}</p>
             {% if v.client %}
-            <p class="col-span-2">Timezone: {{ v.client.timezone or 'Unknown' }} &middot; Locale: {{ v.client.language or 'Unknown' }}</p>
-            <p class="col-span-2">Landing page: {{ v.client.landing_page or 'Unknown' }}</p>
+            <p>Dark Mode: {{ 'Yes' if v.client.prefers_dark else 'No' }}</p>
+            <p>Reduced Motion: {{ 'Yes' if v.client.prefers_reduced_motion else 'No' }}</p>
+            <p>Cookies Enabled: {{ 'Yes' if v.client.cookies_enabled else 'No' }}</p>
+            <p>LocalStorage: {{ 'Yes' if v.client.local_storage else 'No' }}</p>
+            <p>SessionStorage: {{ 'Yes' if v.client.session_storage else 'No' }}</p>
+            <p>IndexedDB: {{ 'Yes' if v.client.indexed_db else 'No' }}</p>
+            <p>WebRTC: {{ 'Yes' if v.client.webrtc_support else 'No' }}</p>
+            <p>Service Worker: {{ 'Yes' if v.client.service_worker_support else 'No' }}</p>
+            {% endif %}
+            <p class="col-span-2">Sec-CH-UA: {{ v.sec_ch_ua or 'N/A' }}</p>
+            <p>Mobile (CH): {{ v.sec_ch_ua_mobile or 'N/A' }}</p>
+            <p>Platform (CH): {{ v.sec_ch_ua_platform or 'N/A' }}</p>
+
+            <p class="col-span-2 text-white/50 font-bold uppercase text-[10px] mt-1.5">Locale</p>
+            <p class="col-span-2">Accept-Language Header: {{ v.accept_language or 'Unknown' }}</p>
+            {% if v.client %}
+            <p>Browser Locale: {{ v.client.language or 'Unknown' }}</p>
+            <p>All Languages: {{ v.client.languages or 'Unknown' }}</p>
+            <p>Timezone (Browser): {{ v.client.timezone or 'Unknown' }}</p>
+            <p>UTC Offset: {{ v.client.utc_offset ~ ' min' if v.client.utc_offset is not none else 'Unknown' }}</p>
+            {% endif %}
+
+            <p class="col-span-2 text-white/50 font-bold uppercase text-[10px] mt-1.5">Page &amp; Campaign</p>
+            {% if v.client %}
+            <p class="col-span-2">Landing Page: {{ v.client.landing_page or 'Unknown' }}</p>
+            <p class="col-span-2">Page Title: {{ v.client.page_title or 'Unknown' }}</p>
+            <p>UTM Source: {{ v.client.utm_source or 'N/A' }}</p>
+            <p>UTM Medium: {{ v.client.utm_medium or 'N/A' }}</p>
+            <p>UTM Campaign: {{ v.client.utm_campaign or 'N/A' }}</p>
             {% endif %}
             <p class="col-span-2 break-all">Referer: {{ v.referer or 'Direct / None' }}</p>
+
+            <p class="col-span-2 text-white/50 font-bold uppercase text-[10px] mt-1.5">Raw Headers</p>
             <p class="col-span-2 break-all">User-Agent: {{ v.user_agent or 'Unknown' }}</p>
+            {% if not v.client %}
+            <p class="col-span-2 text-yellow-200/70 italic mt-1">Browser/device fields not available yet — visitor loaded the site before this update, or JS collector hasn't run for them.</p>
+            {% endif %}
           </div>
         </details>
       </div>
