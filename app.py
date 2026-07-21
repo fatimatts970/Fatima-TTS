@@ -140,6 +140,8 @@ def log_visitor(ip):
         record["visits"] = record.get("visits", 0) + 1
         record.update(ua_info)
         record.update(headers_snapshot)
+        if record.get("isp", "Unknown") == "Unknown" or record.get("asn", "Unknown") == "Unknown":
+            record.update(lookup_ip_info(ip))
     else:
         record = {
             "first_seen": now,
