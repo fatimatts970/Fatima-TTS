@@ -366,7 +366,12 @@ details summary::-webkit-details-marker{display:none;}
       <div class="bg-white/10 border border-white/20 rounded-xl p-3.5">
         <div class="flex items-center justify-between">
           <div class="min-w-0">
-            <p class="text-white text-sm font-semibold">{{ v.ip }}</p>
+            <p class="text-white text-sm font-semibold flex items-center gap-2">
+              {{ v.ip }}
+              {% if v.ip in online_ips %}
+              <span class="inline-flex items-center gap-1 text-[10px] font-bold text-green-300 bg-green-500/20 border border-green-400/40 rounded-full px-2 py-0.5"><span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>Online</span>
+              {% endif %}
+            </p>
             <p class="text-white/60 text-xs mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>{{ v.location or 'Unknown' }}</p>
             <p class="text-white/40 text-[10px] mt-0.5">{{ v.visits or 1 }} visit(s) &middot; {{ v.generations or 0 }} generation(s)</p>
           </div>
@@ -544,7 +549,8 @@ def admin_logout():
 def admin_dashboard():
     visitors = get_all_visitors()
     blocked = get_blocked_set()
-    return render_template_string(ADMIN_DASHBOARD_HTML, visitors=visitors, blocked=blocked, tab="overview")
+    online_ips = get_online_ips()
+    return render_template_string(ADMIN_DASHBOARD_HTML, visitors=visitors, blocked=blocked, online_ips=online_ips, tab="overview")
 
 
 @app.route("/admin/history")
@@ -626,13 +632,24 @@ def client_info():
 
 
 # ---------- Online users heartbeat ----------
+def get_online_ips():
+    keys = redis_command("KEYS", "online:*")
+    if not isinstance(keys, list) or not keys:
+        return set()
+    values = redis_command("MGET", *keys)
+    if not isinstance(values, list):
+        return set()
+    return {v for v in values if v}
+
+
 @app.route("/api/heartbeat", methods=["POST"])
 def heartbeat():
     data = request.json or {}
     sid = str(data.get("session_id") or "")[:64]
     if not sid:
         return jsonify({"success": False, "count": 1}), 400
-    redis_command("SET", f"online:{sid}", "1", "EX", str(ONLINE_TTL_SECONDS))
+    ip = get_client_ip()
+    redis_command("SET", f"online:{sid}", ip, "EX", str(ONLINE_TTL_SECONDS))
     keys = redis_command("KEYS", "online:*")
     count = len(keys) if isinstance(keys, list) else 1
     return jsonify({"success": True, "count": max(count, 1)})
