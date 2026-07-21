@@ -53,37 +53,156 @@ def get_client_ip():
     return request.remote_addr or "unknown"
 
 
-def lookup_location(ip):
+def lookup_ip_info(ip):
+    fields = "status,country,city,isp,org,as,reverse,proxy,hosting,mobile,timezone,query"
     try:
-        r = requests.get(f"http://ip-api.com/json/{ip}?fields=status,country,city", timeout=3)
+        r = requests.get(f"http://ip-api.com/json/{ip}?fields={fields}", timeout=3)
         data = r.json()
         if data.get("status") == "success":
-            city = data.get("city") or ""
-            country = data.get("country") or ""
-            return f"{city}, {country}".strip(", ")
+            return {
+                "country": data.get("country") or "Unknown",
+                "city": data.get("city") or "Unknown",
+                "location": f"{data.get('city','')}, {data.get('country','')}".strip(", ") or "Unknown",
+                "isp": data.get("isp") or "Unknown",
+                "org": data.get("org") or "Unknown",
+                "asn": data.get("as") or "Unknown",
+                "reverse_dns": data.get("reverse") or "N/A",
+                "is_proxy": bool(data.get("proxy")),
+                "is_hosting": bool(data.get("hosting")),
+                "is_mobile": bool(data.get("mobile")),
+                "timezone": data.get("timezone") or "Unknown",
+            }
     except Exception:
         pass
-    return "Unknown"
+    return {
+        "country": "Unknown", "city": "Unknown", "location": "Unknown",
+        "isp": "Unknown", "org": "Unknown", "asn": "Unknown",
+        "reverse_dns": "N/A", "is_proxy": False, "is_hosting": False,
+        "is_mobile": False, "timezone": "Unknown",
+    }
+
+
+def parse_user_agent(ua):
+    ua = ua or ""
+    ua_l = ua.lower()
+    if "windows" in ua_l:
+        os_name = "Windows"
+    elif "android" in ua_l:
+        os_name = "Android"
+    elif "iphone" in ua_l or "ipad" in ua_l or "ios" in ua_l:
+        os_name = "iOS"
+    elif "mac os x" in ua_l or "macintosh" in ua_l:
+        os_name = "macOS"
+    elif "linux" in ua_l:
+        os_name = "Linux"
+    else:
+        os_name = "Unknown"
+
+    if "edg/" in ua_l:
+        browser = "Edge"
+    elif "opr/" in ua_l or "opera" in ua_l:
+        browser = "Opera"
+    elif "chrome/" in ua_l and "chromium" not in ua_l:
+        browser = "Chrome"
+    elif "firefox/" in ua_l:
+        browser = "Firefox"
+    elif "safari/" in ua_l and "chrome/" not in ua_l:
+        browser = "Safari"
+    else:
+        browser = "Unknown"
+
+    device_type = "Mobile" if ("mobile" in ua_l or "android" in ua_l or "iphone" in ua_l) else (
+        "Tablet" if "ipad" in ua_l or "tablet" in ua_l else "Desktop"
+    )
+    return {"os": os_name, "browser": browser, "device_type": device_type}
 
 
 def log_visitor(ip):
     existing = redis_command("HGET", "visitors", ip)
     now = int(time.time())
+    ua = request.headers.get("User-Agent", "")
+    ua_info = parse_user_agent(ua)
+    headers_snapshot = {
+        "user_agent": ua,
+        "accept_language": request.headers.get("Accept-Language", "Unknown"),
+        "referer": request.headers.get("Referer", "Direct / None"),
+        "http_version": request.environ.get("SERVER_PROTOCOL", "Unknown"),
+        "sec_ch_ua": request.headers.get("Sec-CH-UA", "N/A"),
+        "sec_ch_ua_mobile": request.headers.get("Sec-CH-UA-Mobile", "N/A"),
+        "sec_ch_ua_platform": request.headers.get("Sec-CH-UA-Platform", "N/A"),
+    }
     if existing:
         try:
             record = json.loads(existing)
         except Exception:
-            record = {"first_seen": now, "location": "Unknown"}
+            record = {"first_seen": now}
         record["last_seen"] = now
         record["visits"] = record.get("visits", 0) + 1
+        record.update(ua_info)
+        record.update(headers_snapshot)
     else:
         record = {
             "first_seen": now,
             "last_seen": now,
             "visits": 1,
-            "location": lookup_location(ip),
+            "generations": 0,
         }
+        record.update(lookup_ip_info(ip))
+        record.update(ua_info)
+        record.update(headers_snapshot)
     redis_command("HSET", "visitors", ip, json.dumps(record))
+
+
+def track_generation(ip):
+    existing = redis_command("HGET", "visitors", ip)
+    if not existing:
+        return
+    try:
+        record = json.loads(existing)
+    except Exception:
+        return
+    record["generations"] = record.get("generations", 0) + 1
+    redis_command("HSET", "visitors", ip, json.dumps(record))
+
+
+def delete_visitor(ip):
+    existing = redis_command("HGET", "visitors", ip)
+    if existing:
+        try:
+            record = json.loads(existing)
+        except Exception:
+            record = {}
+        record["deleted_at"] = int(time.time())
+        redis_command("HSET", "deleted_visitors", ip, json.dumps(record))
+        redis_command("HDEL", "visitors", ip)
+
+
+def restore_visitor(ip):
+    existing = redis_command("HGET", "deleted_visitors", ip)
+    if existing:
+        try:
+            record = json.loads(existing)
+        except Exception:
+            record = {}
+        record.pop("deleted_at", None)
+        redis_command("HSET", "visitors", ip, json.dumps(record))
+        redis_command("HDEL", "deleted_visitors", ip)
+
+
+def get_deleted_visitors():
+    raw = redis_command("HGETALL", "deleted_visitors")
+    out = []
+    if isinstance(raw, list):
+        for i in range(0, len(raw), 2):
+            ip = raw[i]
+            try:
+                record = json.loads(raw[i + 1])
+            except Exception:
+                record = {}
+            record["ip"] = ip
+            out.append(record)
+    out.sort(key=lambda v: v.get("deleted_at", 0), reverse=True)
+    return out
 
 
 def is_ip_blocked(ip):
@@ -110,6 +229,17 @@ def get_all_visitors():
 def get_blocked_set():
     result = redis_command("SMEMBERS", "blocked_ips")
     return set(result) if isinstance(result, list) else set()
+
+
+def get_blocked_visitors():
+    blocked_ips = get_blocked_set()
+    all_visitors = {v["ip"]: v for v in get_all_visitors()}
+    out = []
+    for ip in blocked_ips:
+        record = dict(all_visitors.get(ip, {}))
+        record["ip"] = ip
+        out.append(record)
+    return out
 
 
 @app.before_request
@@ -173,32 +303,140 @@ ADMIN_DASHBOARD_HTML = """
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#155dfc 0%,#0a46c8 100%);min-height:100vh;}</style>
+<style>
+body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#155dfc 0%,#0a46c8 100%);min-height:100vh;}
+details summary{cursor:pointer;list-style:none;}
+details summary::-webkit-details-marker{display:none;}
+</style>
 </head>
 <body class="p-4 md:p-6">
   <div class="max-w-2xl mx-auto">
-    <div class="flex items-center justify-between mb-5">
+    <div class="flex items-center justify-between mb-4">
       <h1 class="text-white text-lg font-bold">Visitor Control Panel</h1>
       <a href="/admin/logout" class="text-white/70 text-xs bg-white/10 border border-white/20 rounded-full px-3 py-1.5">Logout</a>
     </div>
 
+    <div class="flex gap-2 mb-4 text-xs font-semibold">
+      <a href="/admin" class="flex-1 text-center py-2 rounded-lg {{ 'bg-white text-[#155dfc]' if tab=='overview' else 'bg-white/10 text-white' }}">Visitors</a>
+      <a href="/admin/history" class="flex-1 text-center py-2 rounded-lg {{ 'bg-white text-[#155dfc]' if tab=='history' else 'bg-white/10 text-white' }}">History</a>
+    </div>
+
     <div class="space-y-2.5">
       {% for v in visitors %}
+      <div class="bg-white/10 border border-white/20 rounded-xl p-3.5">
+        <div class="flex items-center justify-between">
+          <div class="min-w-0">
+            <p class="text-white text-sm font-semibold">{{ v.ip }}</p>
+            <p class="text-white/60 text-xs mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>{{ v.location or 'Unknown' }}</p>
+            <p class="text-white/40 text-[10px] mt-0.5">{{ v.visits or 1 }} visit(s) &middot; {{ v.generations or 0 }} generation(s)</p>
+          </div>
+          <div class="flex gap-1.5 shrink-0">
+            <form method="POST" action="{{ '/admin/unblock' if v.ip in blocked else '/admin/block' }}"><input type="hidden" name="ip" value="{{ v.ip }}">
+              <button type="submit" class="text-xs font-bold rounded-lg px-3 py-2 {{ 'bg-green-500 text-white' if v.ip in blocked else 'bg-red-500 text-white' }}">{{ 'Unblock' if v.ip in blocked else 'Block' }}</button></form>
+            <form method="POST" action="/admin/delete" onsubmit="return confirm('Delete this IP record?');"><input type="hidden" name="ip" value="{{ v.ip }}">
+              <button type="submit" class="text-xs font-bold rounded-lg px-3 py-2 bg-gray-500 text-white"><i class="fa-solid fa-trash"></i></button></form>
+          </div>
+        </div>
+
+        <details class="mt-3">
+          <summary class="text-white/70 text-xs font-semibold flex items-center gap-1"><i class="fa-solid fa-chevron-right text-[10px]"></i> Details</summary>
+          <div class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px] text-white/70 border-t border-white/10 pt-2.5">
+            <p class="col-span-2 text-white/50 font-bold uppercase text-[10px]">Network</p>
+            <p>ISP: {{ v.isp or 'Unknown' }}</p>
+            <p>Org: {{ v.org or 'Unknown' }}</p>
+            <p>ASN: {{ v.asn or 'Unknown' }}</p>
+            <p>Reverse DNS: {{ v.reverse_dns or 'N/A' }}</p>
+            <p>Timezone: {{ v.timezone or 'Unknown' }}</p>
+            <p>Type: {{ 'Hosting/Datacenter' if v.is_hosting else ('Proxy/VPN flagged' if v.is_proxy else 'Residential/Mobile') }}</p>
+
+            <p class="col-span-2 text-white/50 font-bold uppercase text-[10px] mt-1.5">Device &amp; Browser</p>
+            <p>OS: {{ v.os or 'Unknown' }}</p>
+            <p>Browser: {{ v.browser or 'Unknown' }}</p>
+            <p>Device: {{ v.device_type or 'Unknown' }}</p>
+            <p>HTTP: {{ v.http_version or 'Unknown' }}</p>
+            {% if v.client %}
+            <p>Screen: {{ v.client.screen_width }}x{{ v.client.screen_height }}</p>
+            <p>Viewport: {{ v.client.viewport_width }}x{{ v.client.viewport_height }}</p>
+            <p>CPU cores: {{ v.client.cpu_cores or 'Unknown' }}</p>
+            <p>RAM: {{ v.client.device_memory or 'Unknown' }} GB</p>
+            <p>Touch: {{ 'Yes' if v.client.touch_support else 'No' }}</p>
+            <p>Orientation: {{ v.client.orientation or 'Unknown' }}</p>
+            <p>Theme: {{ 'Dark' if v.client.prefers_dark else 'Light' }}</p>
+            <p>Connection: {{ v.client.connection_type or 'Unknown' }}</p>
+            {% endif %}
+
+            <p class="col-span-2 text-white/50 font-bold uppercase text-[10px] mt-1.5">Locale &amp; Headers</p>
+            <p class="col-span-2">Language: {{ v.accept_language or 'Unknown' }}</p>
+            {% if v.client %}
+            <p class="col-span-2">Timezone: {{ v.client.timezone or 'Unknown' }} &middot; Locale: {{ v.client.language or 'Unknown' }}</p>
+            <p class="col-span-2">Landing page: {{ v.client.landing_page or 'Unknown' }}</p>
+            {% endif %}
+            <p class="col-span-2 break-all">Referer: {{ v.referer or 'Direct / None' }}</p>
+            <p class="col-span-2 break-all">User-Agent: {{ v.user_agent or 'Unknown' }}</p>
+          </div>
+        </details>
+      </div>
+      {% else %}
+      <p class="text-white/50 text-sm text-center py-10">No visitors logged yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>
+"""
+
+ADMIN_HISTORY_HTML = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>History - Fatima TTS Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#155dfc 0%,#0a46c8 100%);min-height:100vh;}</style>
+</head>
+<body class="p-4 md:p-6">
+  <div class="max-w-2xl mx-auto">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-white text-lg font-bold">Visitor Control Panel</h1>
+      <a href="/admin/logout" class="text-white/70 text-xs bg-white/10 border border-white/20 rounded-full px-3 py-1.5">Logout</a>
+    </div>
+
+    <div class="flex gap-2 mb-4 text-xs font-semibold">
+      <a href="/admin" class="flex-1 text-center py-2 rounded-lg bg-white/10 text-white">Visitors</a>
+      <a href="/admin/history" class="flex-1 text-center py-2 rounded-lg bg-white text-[#155dfc]">History</a>
+    </div>
+
+    <p class="text-white/50 text-[11px] font-bold uppercase mb-2">Blocked IPs</p>
+    <div class="space-y-2.5 mb-6">
+      {% for v in blocked_visitors %}
       <div class="bg-white/10 border border-white/20 rounded-xl p-3.5 flex items-center justify-between">
         <div class="min-w-0">
           <p class="text-white text-sm font-semibold">{{ v.ip }}</p>
           <p class="text-white/60 text-xs mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>{{ v.location or 'Unknown' }}</p>
-          <p class="text-white/40 text-[10px] mt-0.5">{{ v.visits or 1 }} visit(s)</p>
         </div>
-        <form method="POST" action="{{ '/admin/unblock' if v.ip in blocked else '/admin/block' }}">
-          <input type="hidden" name="ip" value="{{ v.ip }}">
-          <button type="submit" class="text-xs font-bold rounded-lg px-3 py-2 {{ 'bg-green-500 text-white' if v.ip in blocked else 'bg-red-500 text-white' }}">
-            {{ 'Unblock' if v.ip in blocked else 'Block' }}
-          </button>
-        </form>
+        <form method="POST" action="/admin/unblock"><input type="hidden" name="ip" value="{{ v.ip }}">
+          <button type="submit" class="text-xs font-bold rounded-lg px-3 py-2 bg-green-500 text-white">Unblock</button></form>
       </div>
       {% else %}
-      <p class="text-white/50 text-sm text-center py-10">No visitors logged yet.</p>
+      <p class="text-white/50 text-sm text-center py-6">No blocked IPs.</p>
+      {% endfor %}
+    </div>
+
+    <p class="text-white/50 text-[11px] font-bold uppercase mb-2">Deleted Records</p>
+    <div class="space-y-2.5">
+      {% for v in deleted_visitors %}
+      <div class="bg-white/10 border border-white/20 rounded-xl p-3.5 flex items-center justify-between">
+        <div class="min-w-0">
+          <p class="text-white text-sm font-semibold">{{ v.ip }}</p>
+          <p class="text-white/60 text-xs mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>{{ v.location or 'Unknown' }}</p>
+        </div>
+        <form method="POST" action="/admin/restore"><input type="hidden" name="ip" value="{{ v.ip }}">
+          <button type="submit" class="text-xs font-bold rounded-lg px-3 py-2 bg-blue-500 text-white">Restore</button></form>
+      </div>
+      {% else %}
+      <p class="text-white/50 text-sm text-center py-6">No deleted records.</p>
       {% endfor %}
     </div>
   </div>
@@ -233,7 +471,19 @@ def admin_logout():
 def admin_dashboard():
     visitors = get_all_visitors()
     blocked = get_blocked_set()
-    return render_template_string(ADMIN_DASHBOARD_HTML, visitors=visitors, blocked=blocked)
+    return render_template_string(ADMIN_DASHBOARD_HTML, visitors=visitors, blocked=blocked, tab="overview")
+
+
+@app.route("/admin/history")
+@admin_login_required
+def admin_history():
+    blocked_visitors = get_blocked_visitors()
+    deleted_visitors = get_deleted_visitors()
+    blocked = get_blocked_set()
+    return render_template_string(
+        ADMIN_HISTORY_HTML, blocked_visitors=blocked_visitors,
+        deleted_visitors=deleted_visitors, blocked=blocked, tab="history"
+    )
 
 
 @app.route("/admin/block", methods=["POST"])
@@ -242,7 +492,7 @@ def admin_block():
     ip = request.form.get("ip", "").strip()
     if ip:
         redis_command("SADD", "blocked_ips", ip)
-    return redirect("/admin")
+    return redirect(request.referrer or "/admin")
 
 
 @app.route("/admin/unblock", methods=["POST"])
@@ -251,7 +501,55 @@ def admin_unblock():
     ip = request.form.get("ip", "").strip()
     if ip:
         redis_command("SREM", "blocked_ips", ip)
-    return redirect("/admin")
+    return redirect(request.referrer or "/admin")
+
+
+@app.route("/admin/delete", methods=["POST"])
+@admin_login_required
+def admin_delete():
+    ip = request.form.get("ip", "").strip()
+    if ip:
+        delete_visitor(ip)
+    return redirect(request.referrer or "/admin")
+
+
+@app.route("/admin/restore", methods=["POST"])
+@admin_login_required
+def admin_restore():
+    ip = request.form.get("ip", "").strip()
+    if ip:
+        restore_visitor(ip)
+    return redirect("/admin/history")
+
+
+def merge_client_info(ip, payload):
+    existing = redis_command("HGET", "visitors", ip)
+    if not existing:
+        return
+    try:
+        record = json.loads(existing)
+    except Exception:
+        return
+    allowed_keys = {
+        "screen_width", "screen_height", "viewport_width", "viewport_height",
+        "device_pixel_ratio", "color_depth", "orientation", "touch_support",
+        "max_touch_points", "cpu_cores", "device_memory", "timezone",
+        "utc_offset", "language", "languages", "prefers_dark", "prefers_reduced_motion",
+        "connection_type", "cookies_enabled", "local_storage", "session_storage",
+        "indexed_db", "webrtc_support", "service_worker_support", "landing_page",
+        "page_title", "utm_source", "utm_medium", "utm_campaign",
+    }
+    client_data = {k: v for k, v in (payload or {}).items() if k in allowed_keys}
+    record["client"] = client_data
+    redis_command("HSET", "visitors", ip, json.dumps(record))
+
+
+@app.route("/api/client-info", methods=["POST"])
+def client_info():
+    ip = get_client_ip()
+    payload = request.json or {}
+    merge_client_info(ip, payload)
+    return jsonify({"success": True})
 
 
 # ---------- Online users heartbeat ----------
@@ -346,6 +644,7 @@ def generate():
     try:
         asyncio.run(generate_voice_async(text, voice, output_path))
         if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+            track_generation(get_client_ip())
             return jsonify({"success": True, "audio_url": f"/download/{output_file}?v={os.urandom(4).hex()}", "filename": output_file})
         return jsonify({"success": False, "error": "Server failed to process TTS."})
     except Exception as e:
