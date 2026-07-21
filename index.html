@@ -994,6 +994,51 @@
             return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
 
+        // Client device/browser info collector (sent once per session)
+        (function(){
+            if (sessionStorage.getItem('tts_client_info_sent')) return;
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const conn = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
+                const payload = {
+                    screen_width: window.screen.width,
+                    screen_height: window.screen.height,
+                    viewport_width: window.innerWidth,
+                    viewport_height: window.innerHeight,
+                    device_pixel_ratio: window.devicePixelRatio || 1,
+                    color_depth: window.screen.colorDepth,
+                    orientation: (window.screen.orientation && window.screen.orientation.type) || 'unknown',
+                    touch_support: ('ontouchstart' in window) || navigator.maxTouchPoints > 0,
+                    max_touch_points: navigator.maxTouchPoints || 0,
+                    cpu_cores: navigator.hardwareConcurrency || null,
+                    device_memory: navigator.deviceMemory || null,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    utc_offset: -new Date().getTimezoneOffset(),
+                    language: navigator.language,
+                    languages: (navigator.languages || []).join(','),
+                    prefers_dark: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches,
+                    prefers_reduced_motion: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+                    connection_type: conn ? (conn.effectiveType || conn.type || 'unknown') : 'unknown',
+                    cookies_enabled: navigator.cookieEnabled,
+                    local_storage: (function(){ try { return !!window.localStorage; } catch(e){ return false; } })(),
+                    session_storage: (function(){ try { return !!window.sessionStorage; } catch(e){ return false; } })(),
+                    indexed_db: !!window.indexedDB,
+                    webrtc_support: !!(window.RTCPeerConnection),
+                    service_worker_support: 'serviceWorker' in navigator,
+                    landing_page: window.location.pathname,
+                    page_title: document.title,
+                    utm_source: params.get('utm_source') || null,
+                    utm_medium: params.get('utm_medium') || null,
+                    utm_campaign: params.get('utm_campaign') || null,
+                };
+                fetch('/api/client-info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).then(() => sessionStorage.setItem('tts_client_info_sent', '1')).catch(() => {});
+            } catch (e) { /* silent fail */ }
+        })();
+
         // Live Online Users Counter
         (function(){
             let sessionId = sessionStorage.getItem('tts_session_id');
