@@ -244,13 +244,51 @@ def get_blocked_visitors():
     return out
 
 
+ACCESS_DENIED_HTML = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Access Denied - Fatima TTS Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#155dfc 0%,#0a46c8 100%);min-height:100vh;
+       display:flex;align-items:center;justify-content:center;padding:24px;margin:0;}
+  .card{max-width:420px;width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
+        border-radius:20px;padding:36px 28px;text-align:center;backdrop-filter:blur(6px);}
+  .icon{width:72px;height:72px;border-radius:50%;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);
+        display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+  .icon i{color:#fca5a5;font-size:28px;}
+  h1{color:#fff;font-size:22px;font-weight:700;margin:0 0 10px;}
+  p{color:rgba(255,255,255,0.7);font-size:14px;line-height:1.6;margin:0 0 26px;}
+  .wa-btn{display:inline-flex;align-items:center;gap:10px;background:#25D366;color:#fff;text-decoration:none;
+          font-weight:600;font-size:14px;padding:13px 26px;border-radius:14px;transition:opacity .2s;}
+  .wa-btn:hover{opacity:0.9;}
+  .wa-btn i{font-size:20px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon"><i class="fa-solid fa-ban"></i></div>
+    <h1>Access Denied</h1>
+    <p>Your access to Fatima TTS Studio has been restricted. If you believe this is a mistake, please contact us on WhatsApp and we'll look into it.</p>
+    <a class="wa-btn" href="https://wa.me/923051400055?text=Hello" target="_blank" rel="noopener">
+      <i class="fa-brands fa-whatsapp"></i> Contact us on WhatsApp
+    </a>
+  </div>
+</body>
+</html>
+"""
+
+
 @app.before_request
 def enforce_block_and_log():
     if request.path.startswith("/admin") or request.path.startswith("/static"):
         return
     ip = get_client_ip()
     if is_ip_blocked(ip):
-        return "Access denied.", 403
+        return render_template_string(ACCESS_DENIED_HTML), 403
     if request.path in ("/", "/generate", "/preview"):
         log_visitor(ip)
 
