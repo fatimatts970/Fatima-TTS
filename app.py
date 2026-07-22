@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, session, redirect, render_template_string
+from flask import Flask, request, jsonify, send_from_directory, session, redirect, render_template_string, Response
 import os
 import asyncio
 import edge_tts
@@ -6,7 +6,10 @@ import random
 import time
 import hmac
 import json
+import csv
+import io
 import requests
+from datetime import datetime, timedelta
 from functools import wraps
 from werkzeug.utils import secure_filename
 from mutagen.mp3 import MP3
@@ -25,6 +28,41 @@ ONLINE_TTL_SECONDS = 30
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "")
 ADMIN_PHONE = os.environ.get("ADMIN_PHONE", "")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
+
+CALLMEBOT_PHONE = os.environ.get("CALLMEBOT_PHONE", "923051400055")
+CALLMEBOT_APIKEY = os.environ.get("CALLMEBOT_APIKEY", "")
+BIG_GENERATION_ALERT_SECONDS = 120
+
+
+def send_whatsapp_alert(message):
+    if not CALLMEBOT_APIKEY:
+        return
+    try:
+        requests.get(
+            "https://api.callmebot.com/whatsapp.php",
+            params={"phone": CALLMEBOT_PHONE, "text": message, "apikey": CALLMEBOT_APIKEY},
+            timeout=5,
+        )
+    except Exception:
+        pass
+
+
+def format_ts(ts):
+    if not ts:
+        return "Unknown"
+    try:
+        return datetime.fromtimestamp(int(ts)).strftime("%d %b, %I:%M %p")
+    except Exception:
+        return "Unknown"
+
+
+def country_flag(code):
+    if not code or len(code) != 2:
+        return ""
+    try:
+        return chr(0x1F1E6 + ord(code[0].upper()) - 65) + chr(0x1F1E6 + ord(code[1].upper()) - 65)
+    except Exception:
+        return ""
 
 
 # ---------- Site on/off switch ----------
@@ -65,13 +103,15 @@ def get_client_ip():
 
 
 def lookup_ip_info(ip):
-    fields = "status,country,city,isp,org,as,reverse,proxy,hosting,mobile,timezone,query"
+    fields = "status,country,countryCode,city,isp,org,as,reverse,proxy,hosting,mobile,timezone,query"
     try:
         r = requests.get(f"http://ip-api.com/json/{ip}?fields={fields}", timeout=3)
         data = r.json()
         if data.get("status") == "success":
             return {
                 "country": data.get("country") or "Unknown",
+                "country_code": data.get("countryCode") or "",
+                "flag": country_flag(data.get("countryCode")),
                 "city": data.get("city") or "Unknown",
                 "location": f"{data.get('city','')}, {data.get('country','')}".strip(", ") or "Unknown",
                 "isp": data.get("isp") or "Unknown",
@@ -86,7 +126,7 @@ def lookup_ip_info(ip):
     except Exception:
         pass
     return {
-        "country": "Unknown", "city": "Unknown", "location": "Unknown",
+        "country": "Unknown", "country_code": "", "flag": "", "city": "Unknown", "location": "Unknown",
         "isp": "Unknown", "org": "Unknown", "asn": "Unknown",
         "reverse_dns": "N/A", "is_proxy": False, "is_hosting": False,
         "is_mobile": False, "timezone": "Unknown",
@@ -131,6 +171,7 @@ def parse_user_agent(ua):
 def log_visitor(ip):
     existing = redis_command("HGET", "visitors", ip)
     now = int(time.time())
+    today = datetime.utcnow().strftime("%Y-%m-%d")
     ua = request.headers.get("User-Agent", "")
     ua_info = parse_user_agent(ua)
     headers_snapshot = {
@@ -142,6 +183,7 @@ def log_visitor(ip):
         "sec_ch_ua_mobile": request.headers.get("Sec-CH-UA-Mobile", "N/A"),
         "sec_ch_ua_platform": request.headers.get("Sec-CH-UA-Platform", "N/A"),
     }
+    is_new = not existing
     if existing:
         try:
             record = json.loads(existing)
@@ -164,9 +206,13 @@ def log_visitor(ip):
         record.update(ua_info)
         record.update(headers_snapshot)
     redis_command("HSET", "visitors", ip, json.dumps(record))
+    redis_command("INCR", f"stats:visits:{today}")
+    if is_new:
+        redis_command("INCR", f"stats:new_visitors:{today}")
+        send_whatsapp_alert(f"🆕 New visitor on Fatima TTS: {ip} ({record.get('location', 'Unknown')})")
 
 
-def track_generation(ip, duration_seconds=0):
+def track_generation(ip, duration_seconds=0, voice=None):
     existing = redis_command("HGET", "visitors", ip)
     if not existing:
         return
@@ -174,9 +220,19 @@ def track_generation(ip, duration_seconds=0):
         record = json.loads(existing)
     except Exception:
         return
+    duration_seconds = duration_seconds or 0
     record["generations"] = record.get("generations", 0) + 1
-    record["total_voice_seconds"] = record.get("total_voice_seconds", 0) + (duration_seconds or 0)
+    record["total_voice_seconds"] = record.get("total_voice_seconds", 0) + duration_seconds
     redis_command("HSET", "visitors", ip, json.dumps(record))
+
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    redis_command("INCR", f"stats:gens:{today}")
+    redis_command("INCRBYFLOAT", f"stats:voice_seconds:{today}", str(duration_seconds))
+    if voice:
+        redis_command("HINCRBY", "voice_stats", voice, 1)
+    if duration_seconds >= BIG_GENERATION_ALERT_SECONDS:
+        mins = round(duration_seconds / 60, 1)
+        send_whatsapp_alert(f"⚠️ Fatima TTS: {ip} ({record.get('location', 'Unknown')}) generated a {mins} minute voice.")
 
 
 def delete_visitor(ip):
@@ -254,6 +310,57 @@ def get_blocked_visitors():
         record["ip"] = ip
         out.append(record)
     return out
+
+
+def get_weekly_stats(days=7):
+    today = datetime.utcnow().date()
+    out = []
+    for i in range(days - 1, -1, -1):
+        d = today - timedelta(days=i)
+        ds = d.strftime("%Y-%m-%d")
+        visits = redis_command("GET", f"stats:visits:{ds}")
+        gens = redis_command("GET", f"stats:gens:{ds}")
+        secs = redis_command("GET", f"stats:voice_seconds:{ds}")
+        out.append({
+            "date": d.strftime("%d %b"),
+            "visits": int(visits) if visits else 0,
+            "generations": int(gens) if gens else 0,
+            "minutes": round((float(secs) if secs else 0) / 60, 1),
+        })
+    return out
+
+
+def get_voice_stats(limit=5):
+    raw = redis_command("HGETALL", "voice_stats")
+    out = []
+    if isinstance(raw, list):
+        for i in range(0, len(raw), 2):
+            try:
+                out.append({"voice": raw[i], "count": int(raw[i + 1])})
+            except Exception:
+                pass
+    out.sort(key=lambda x: x["count"], reverse=True)
+    return out[:limit]
+
+
+def get_top_users(visitors, limit=5):
+    ranked = sorted(visitors, key=lambda v: v.get("total_voice_seconds", 0) or 0, reverse=True)
+    return [v for v in ranked if (v.get("total_voice_seconds", 0) or 0) > 0][:limit]
+
+
+def set_visitor_note(ip, note):
+    existing = redis_command("HGET", "visitors", ip)
+    if not existing:
+        return
+    try:
+        record = json.loads(existing)
+    except Exception:
+        return
+    record["note"] = note[:300]
+    redis_command("HSET", "visitors", ip, json.dumps(record))
+
+
+app.jinja_env.filters["fmtts"] = format_ts
 
 
 ACCESS_DENIED_HTML = """
@@ -390,8 +497,9 @@ ADMIN_DASHBOARD_HTML = """
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel - Fatima TTS</title>
-<meta http-equiv="refresh" content="10">
+<meta http-equiv="refresh" content="15">
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
@@ -430,14 +538,50 @@ details summary::-webkit-details-marker{display:none;}
       </form>
     </div>
 
+    <div class="bg-white/10 border border-white/20 rounded-xl p-3.5 mb-4">
+      <p class="text-white text-sm font-semibold mb-2"><i class="fa-solid fa-chart-line mr-1.5"></i>Last 7 Days</p>
+      <canvas id="weeklyChart" height="150"></canvas>
+    </div>
+
+    {% if top_users %}
+    <div class="bg-white/10 border border-white/20 rounded-xl p-3.5 mb-4">
+      <p class="text-white text-sm font-semibold mb-2"><i class="fa-solid fa-fire mr-1.5"></i>Top 5 Most Active Users</p>
+      <div class="space-y-1.5">
+        {% for u in top_users %}
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-white/80">{{ loop.index }}. {{ u.flag }} {{ u.ip }}</span>
+          <span class="text-green-300 font-semibold">{{ '%.1f'|format((u.total_voice_seconds or 0)/60) }} min</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if voice_stats %}
+    <div class="bg-white/10 border border-white/20 rounded-xl p-3.5 mb-4">
+      <p class="text-white text-sm font-semibold mb-2"><i class="fa-solid fa-microphone mr-1.5"></i>Top Voices Used</p>
+      <div class="space-y-1.5">
+        {% for vs in voice_stats %}
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-white/80">{{ vs.voice }}</span>
+          <span class="text-blue-200 font-semibold">{{ vs.count }}x</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
     <div class="flex gap-2 mb-4 text-xs font-semibold">
       <a href="/admin" class="flex-1 text-center py-2 rounded-lg {{ 'bg-white text-[#155dfc]' if tab=='overview' else 'bg-white/10 text-white' }}">Visitors</a>
       <a href="/admin/history" class="flex-1 text-center py-2 rounded-lg {{ 'bg-white text-[#155dfc]' if tab=='history' else 'bg-white/10 text-white' }}">History</a>
     </div>
 
+    <input type="text" id="searchBox" placeholder="Search by IP or location..." oninput="filterVisitors(this.value)"
+      class="w-full mb-3 px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 text-sm focus:outline-none focus:border-white">
+
     <div class="space-y-2.5">
       {% for v in visitors %}
-      <div class="bg-white/10 border border-white/20 rounded-xl p-3.5">
+      <div class="bg-white/10 border border-white/20 rounded-xl p-3.5 visitor-card" data-search="{{ v.ip }} {{ (v.location or '')|lower }}">
         <div class="flex items-center justify-between">
           <div class="min-w-0">
             <p class="text-white text-sm font-semibold flex items-center gap-2">
@@ -446,8 +590,9 @@ details summary::-webkit-details-marker{display:none;}
               <span class="inline-flex items-center gap-1 text-[10px] font-bold text-green-300 bg-green-500/20 border border-green-400/40 rounded-full px-2 py-0.5"><span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>Online</span>
               {% endif %}
             </p>
-            <p class="text-white/60 text-xs mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>{{ v.location or 'Unknown' }}</p>
+            <p class="text-white/60 text-xs mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>{{ v.flag }} {{ v.location or 'Unknown' }}</p>
             <p class="text-white/40 text-[10px] mt-0.5">{{ v.visits or 1 }} visit(s) &middot; {{ v.generations or 0 }} generation(s) &middot; {{ '%.1f'|format((v.total_voice_seconds or 0)/60) }} min voice</p>
+            <p class="text-white/40 text-[10px] mt-0.5">Last seen: {{ v.last_seen|fmtts }}</p>
           </div>
           <div class="flex gap-1.5 shrink-0">
             <form method="POST" action="{{ '/admin/unblock' if v.ip in blocked else '/admin/block' }}"><input type="hidden" name="ip" value="{{ v.ip }}">
@@ -460,6 +605,13 @@ details summary::-webkit-details-marker{display:none;}
         <details class="mt-3">
           <summary class="text-white/70 text-xs font-semibold flex items-center gap-1"><i class="fa-solid fa-chevron-right text-[10px]"></i> Details</summary>
           <div class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px] text-white/70 border-t border-white/10 pt-2.5">
+            <p class="col-span-2 text-white/50 font-bold uppercase text-[10px]">Note</p>
+            <form method="POST" action="/admin/note" class="col-span-2 flex gap-1.5">
+              <input type="hidden" name="ip" value="{{ v.ip }}">
+              <input type="text" name="note" value="{{ v.note or '' }}" placeholder="Apna note likho..." maxlength="300"
+                class="flex-1 min-w-0 px-2.5 py-1.5 bg-black/20 border border-white/20 rounded-lg text-white placeholder-white/40 text-[11px] focus:outline-none focus:border-white">
+              <button type="submit" class="text-[11px] font-bold rounded-lg px-2.5 bg-white/20 text-white">Save</button>
+            </form>
             <p class="col-span-2 text-white/50 font-bold uppercase text-[10px]">Usage</p>
             <p class="col-span-2">Is user ne <span class="text-white font-semibold">{{ '%.1f'|format((v.total_voice_seconds or 0)/60) }} minutes</span> ki voice generate ki hai ({{ v.generations or 0 }} baar).</p>
             <p class="col-span-2 text-white/50 font-bold uppercase text-[10px] mt-1.5">Network</p>
@@ -535,6 +687,34 @@ details summary::-webkit-details-marker{display:none;}
       {% endfor %}
     </div>
   </div>
+  <script>
+    function filterVisitors(q) {
+      q = q.toLowerCase();
+      document.querySelectorAll('.visitor-card').forEach(function (card) {
+        var match = card.getAttribute('data-search').indexOf(q) !== -1;
+        card.style.display = match ? '' : 'none';
+      });
+    }
+    const weeklyStats = {{ weekly_stats|tojson }};
+    new Chart(document.getElementById('weeklyChart'), {
+      type: 'line',
+      data: {
+        labels: weeklyStats.map(function(s){return s.date;}),
+        datasets: [
+          {label: 'Visits', data: weeklyStats.map(function(s){return s.visits;}), borderColor: '#93c5fd', backgroundColor: 'rgba(147,197,253,0.15)', tension: 0.35, fill: true},
+          {label: 'Voice Minutes', data: weeklyStats.map(function(s){return s.minutes;}), borderColor: '#86efac', backgroundColor: 'rgba(134,239,172,0.15)', tension: 0.35, fill: true}
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {legend: {labels: {color: '#fff', font: {size: 10}}}},
+        scales: {
+          x: {ticks: {color: 'rgba(255,255,255,.6)', font: {size: 9}}, grid: {color: 'rgba(255,255,255,.08)'}},
+          y: {ticks: {color: 'rgba(255,255,255,.6)', font: {size: 9}}, grid: {color: 'rgba(255,255,255,.08)'}, beginAtZero: true}
+        }
+      }
+    });
+  </script>
 </body>
 </html>
 """
@@ -563,13 +743,17 @@ ADMIN_HISTORY_HTML = """
       <a href="/admin/history" class="flex-1 text-center py-2 rounded-lg bg-white text-[#155dfc]">History</a>
     </div>
 
+    <a href="/admin/export/csv" class="flex items-center justify-center gap-2 mb-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white text-xs font-semibold">
+      <i class="fa-solid fa-file-csv"></i> Export Visitor History (CSV)
+    </a>
+
     <p class="text-white/50 text-[11px] font-bold uppercase mb-2">Blocked IPs</p>
     <div class="space-y-2.5 mb-6">
       {% for v in blocked_visitors %}
       <div class="bg-white/10 border border-white/20 rounded-xl p-3.5 flex items-center justify-between">
         <div class="min-w-0">
           <p class="text-white text-sm font-semibold">{{ v.ip }}</p>
-          <p class="text-white/60 text-xs mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>{{ v.location or 'Unknown' }}</p>
+          <p class="text-white/60 text-xs mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>{{ v.flag }} {{ v.location or 'Unknown' }}</p>
           <p class="text-white/40 text-[10px] mt-0.5">{{ '%.1f'|format((v.total_voice_seconds or 0)/60) }} min voice generated ({{ v.generations or 0 }} baar)</p>
         </div>
         <form method="POST" action="/admin/unblock"><input type="hidden" name="ip" value="{{ v.ip }}">
@@ -586,7 +770,7 @@ ADMIN_HISTORY_HTML = """
       <div class="bg-white/10 border border-white/20 rounded-xl p-3.5 flex items-center justify-between">
         <div class="min-w-0">
           <p class="text-white text-sm font-semibold">{{ v.ip }}</p>
-          <p class="text-white/60 text-xs mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>{{ v.location or 'Unknown' }}</p>
+          <p class="text-white/60 text-xs mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>{{ v.flag }} {{ v.location or 'Unknown' }}</p>
           <p class="text-white/40 text-[10px] mt-0.5">{{ '%.1f'|format((v.total_voice_seconds or 0)/60) }} min voice generated ({{ v.generations or 0 }} baar)</p>
         </div>
         <form method="POST" action="/admin/restore"><input type="hidden" name="ip" value="{{ v.ip }}">
@@ -632,6 +816,40 @@ def admin_dashboard():
     return render_template_string(
         ADMIN_DASHBOARD_HTML, visitors=visitors, blocked=blocked, online_ips=online_ips, tab="overview",
         total_visitors=len(visitors), online_count=len(online_ips), site_status=get_site_status(),
+        weekly_stats=get_weekly_stats(), voice_stats=get_voice_stats(), top_users=get_top_users(visitors),
+    )
+
+
+@app.route("/admin/note", methods=["POST"])
+@admin_login_required
+def admin_note():
+    ip = request.form.get("ip", "").strip()
+    note = (request.form.get("note") or "").strip()
+    if ip:
+        set_visitor_note(ip, note)
+    return redirect(request.referrer or "/admin")
+
+
+@app.route("/admin/export/csv")
+@admin_login_required
+def admin_export_csv():
+    visitors = get_all_visitors()
+    blocked = get_blocked_set()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["IP", "Location", "ISP", "Visits", "Generations", "Voice Minutes", "First Seen", "Last Seen", "Blocked", "Note"])
+    for v in visitors:
+        writer.writerow([
+            v.get("ip", ""), v.get("location", ""), v.get("isp", ""),
+            v.get("visits", 0), v.get("generations", 0),
+            round((v.get("total_voice_seconds", 0) or 0) / 60, 2),
+            format_ts(v.get("first_seen")), format_ts(v.get("last_seen")),
+            "Yes" if v.get("ip") in blocked else "No",
+            v.get("note", ""),
+        ])
+    return Response(
+        output.getvalue(), mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=fatima_tts_visitors.csv"},
     )
 
 
@@ -828,7 +1046,7 @@ def generate():
                 duration_seconds = MP3(output_path).info.length
             except Exception:
                 duration_seconds = 0
-            track_generation(get_client_ip(), duration_seconds)
+            track_generation(get_client_ip(), duration_seconds, voice)
             return jsonify({"success": True, "audio_url": f"/download/{output_file}?v={os.urandom(4).hex()}", "filename": output_file})
         return jsonify({"success": False, "error": "Server failed to process TTS."})
     except Exception as e:
