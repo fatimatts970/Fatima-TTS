@@ -9,6 +9,7 @@ import json
 import requests
 from functools import wraps
 from werkzeug.utils import secure_filename
+from mutagen.mp3 import MP3
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "fatima-tts-dev-secret-change-me")
@@ -24,6 +25,16 @@ ONLINE_TTL_SECONDS = 30
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "")
 ADMIN_PHONE = os.environ.get("ADMIN_PHONE", "")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
+
+
+# ---------- Site on/off switch ----------
+def get_site_status():
+    status = redis_command("GET", "site_status")
+    return status if status in ("on", "off") else "on"
+
+
+def set_site_status(status):
+    redis_command("SET", "site_status", status)
 
 
 # ---------- Upstash Redis helper ----------
@@ -155,7 +166,7 @@ def log_visitor(ip):
     redis_command("HSET", "visitors", ip, json.dumps(record))
 
 
-def track_generation(ip):
+def track_generation(ip, duration_seconds=0):
     existing = redis_command("HGET", "visitors", ip)
     if not existing:
         return
@@ -164,6 +175,7 @@ def track_generation(ip):
     except Exception:
         return
     record["generations"] = record.get("generations", 0) + 1
+    record["total_voice_seconds"] = record.get("total_voice_seconds", 0) + (duration_seconds or 0)
     redis_command("HSET", "visitors", ip, json.dumps(record))
 
 
@@ -282,10 +294,48 @@ ACCESS_DENIED_HTML = """
 """
 
 
+MAINTENANCE_HTML = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fatima TTS Studio - Updating</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#155dfc 0%,#0a46c8 100%);min-height:100vh;
+       display:flex;align-items:center;justify-content:center;padding:24px;margin:0;}
+  .card{max-width:420px;width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
+        border-radius:20px;padding:40px 28px;text-align:center;backdrop-filter:blur(6px);}
+  .icon{width:78px;height:78px;border-radius:50%;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);
+        display:flex;align-items:center;justify-content:center;margin:0 auto 22px;animation:spin 2.2s linear infinite;}
+  .icon i{color:#fff;font-size:30px;}
+  @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+  h1{color:#fff;font-size:22px;font-weight:700;margin:0 0 10px;letter-spacing:.3px;}
+  p{color:rgba(255,255,255,0.75);font-size:14px;line-height:1.6;margin:0;}
+  .dots span{animation:blink 1.4s infinite;}
+  .dots span:nth-child(2){animation-delay:.2s;}
+  .dots span:nth-child(3){animation-delay:.4s;}
+  @keyframes blink{0%,80%,100%{opacity:0;}40%{opacity:1;}}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon"><i class="fa-solid fa-gear"></i></div>
+    <h1>Website Updating Please Wait<span class="dots"><span>.</span><span>.</span><span>.</span></span></h1>
+    <p>Fatima TTS Studio abhi thodi der ke liye update ho rahi hai. Jald hi wapas online ho jayegi, shukriya!</p>
+  </div>
+</body>
+</html>
+"""
+
+
 @app.before_request
 def enforce_block_and_log():
     if request.path.startswith("/admin") or request.path.startswith("/static"):
         return
+    if get_site_status() == "off":
+        return render_template_string(MAINTENANCE_HTML), 503
     ip = get_client_ip()
     if is_ip_blocked(ip):
         return render_template_string(ACCESS_DENIED_HTML), 403
@@ -340,6 +390,7 @@ ADMIN_DASHBOARD_HTML = """
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel - Fatima TTS</title>
+<meta http-equiv="refresh" content="10">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -354,6 +405,29 @@ details summary::-webkit-details-marker{display:none;}
     <div class="flex items-center justify-between mb-4">
       <h1 class="text-white text-lg font-bold">Visitor Control Panel</h1>
       <a href="/admin/logout" class="text-white/70 text-xs bg-white/10 border border-white/20 rounded-full px-3 py-1.5">Logout</a>
+    </div>
+
+    <div class="grid grid-cols-2 gap-2.5 mb-4">
+      <div class="bg-white/10 border border-white/20 rounded-xl p-3.5 text-center">
+        <p class="text-white text-2xl font-bold">{{ total_visitors }}</p>
+        <p class="text-white/60 text-[11px] font-semibold uppercase mt-0.5">Total Visitors</p>
+      </div>
+      <div class="bg-white/10 border border-white/20 rounded-xl p-3.5 text-center">
+        <p class="text-green-300 text-2xl font-bold">{{ online_count }}</p>
+        <p class="text-white/60 text-[11px] font-semibold uppercase mt-0.5">Online Now</p>
+      </div>
+    </div>
+
+    <div class="bg-white/10 border border-white/20 rounded-xl p-3.5 mb-4 flex items-center justify-between">
+      <div>
+        <p class="text-white text-sm font-semibold">Website Status</p>
+        <p class="text-white/60 text-[11px] mt-0.5">{{ 'Live / ON' if site_status == 'on' else 'OFF - visitors see maintenance page' }}</p>
+      </div>
+      <form method="POST" action="/admin/site/toggle">
+        <button type="submit" class="text-xs font-bold rounded-lg px-4 py-2.5 {{ 'bg-red-500 text-white' if site_status == 'on' else 'bg-green-500 text-white' }}">
+          {{ 'Website Band Karein' if site_status == 'on' else 'Website ON Karein' }}
+        </button>
+      </form>
     </div>
 
     <div class="flex gap-2 mb-4 text-xs font-semibold">
@@ -373,7 +447,7 @@ details summary::-webkit-details-marker{display:none;}
               {% endif %}
             </p>
             <p class="text-white/60 text-xs mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>{{ v.location or 'Unknown' }}</p>
-            <p class="text-white/40 text-[10px] mt-0.5">{{ v.visits or 1 }} visit(s) &middot; {{ v.generations or 0 }} generation(s)</p>
+            <p class="text-white/40 text-[10px] mt-0.5">{{ v.visits or 1 }} visit(s) &middot; {{ v.generations or 0 }} generation(s) &middot; {{ '%.1f'|format((v.total_voice_seconds or 0)/60) }} min voice</p>
           </div>
           <div class="flex gap-1.5 shrink-0">
             <form method="POST" action="{{ '/admin/unblock' if v.ip in blocked else '/admin/block' }}"><input type="hidden" name="ip" value="{{ v.ip }}">
@@ -386,7 +460,9 @@ details summary::-webkit-details-marker{display:none;}
         <details class="mt-3">
           <summary class="text-white/70 text-xs font-semibold flex items-center gap-1"><i class="fa-solid fa-chevron-right text-[10px]"></i> Details</summary>
           <div class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px] text-white/70 border-t border-white/10 pt-2.5">
-            <p class="col-span-2 text-white/50 font-bold uppercase text-[10px]">Network</p>
+            <p class="col-span-2 text-white/50 font-bold uppercase text-[10px]">Usage</p>
+            <p class="col-span-2">Is user ne <span class="text-white font-semibold">{{ '%.1f'|format((v.total_voice_seconds or 0)/60) }} minutes</span> ki voice generate ki hai ({{ v.generations or 0 }} baar).</p>
+            <p class="col-span-2 text-white/50 font-bold uppercase text-[10px] mt-1.5">Network</p>
             <p>ISP: {{ v.isp or 'Unknown' }}</p>
             <p>Org: {{ v.org or 'Unknown' }}</p>
             <p>ASN: {{ v.asn or 'Unknown' }}</p>
@@ -469,6 +545,7 @@ ADMIN_HISTORY_HTML = """
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>History - Fatima TTS Admin</title>
+<meta http-equiv="refresh" content="10">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -493,6 +570,7 @@ ADMIN_HISTORY_HTML = """
         <div class="min-w-0">
           <p class="text-white text-sm font-semibold">{{ v.ip }}</p>
           <p class="text-white/60 text-xs mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>{{ v.location or 'Unknown' }}</p>
+          <p class="text-white/40 text-[10px] mt-0.5">{{ '%.1f'|format((v.total_voice_seconds or 0)/60) }} min voice generated ({{ v.generations or 0 }} baar)</p>
         </div>
         <form method="POST" action="/admin/unblock"><input type="hidden" name="ip" value="{{ v.ip }}">
           <button type="submit" class="text-xs font-bold rounded-lg px-3 py-2 bg-green-500 text-white">Unblock</button></form>
@@ -509,6 +587,7 @@ ADMIN_HISTORY_HTML = """
         <div class="min-w-0">
           <p class="text-white text-sm font-semibold">{{ v.ip }}</p>
           <p class="text-white/60 text-xs mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>{{ v.location or 'Unknown' }}</p>
+          <p class="text-white/40 text-[10px] mt-0.5">{{ '%.1f'|format((v.total_voice_seconds or 0)/60) }} min voice generated ({{ v.generations or 0 }} baar)</p>
         </div>
         <form method="POST" action="/admin/restore"><input type="hidden" name="ip" value="{{ v.ip }}">
           <button type="submit" class="text-xs font-bold rounded-lg px-3 py-2 bg-blue-500 text-white">Restore</button></form>
@@ -550,7 +629,18 @@ def admin_dashboard():
     visitors = get_all_visitors()
     blocked = get_blocked_set()
     online_ips = get_online_ips()
-    return render_template_string(ADMIN_DASHBOARD_HTML, visitors=visitors, blocked=blocked, online_ips=online_ips, tab="overview")
+    return render_template_string(
+        ADMIN_DASHBOARD_HTML, visitors=visitors, blocked=blocked, online_ips=online_ips, tab="overview",
+        total_visitors=len(visitors), online_count=len(online_ips), site_status=get_site_status(),
+    )
+
+
+@app.route("/admin/site/toggle", methods=["POST"])
+@admin_login_required
+def admin_site_toggle():
+    current = get_site_status()
+    set_site_status("off" if current == "on" else "on")
+    return redirect(request.referrer or "/admin")
 
 
 @app.route("/admin/history")
@@ -734,7 +824,11 @@ def generate():
     try:
         asyncio.run(generate_voice_async(text, voice, output_path))
         if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
-            track_generation(get_client_ip())
+            try:
+                duration_seconds = MP3(output_path).info.length
+            except Exception:
+                duration_seconds = 0
+            track_generation(get_client_ip(), duration_seconds)
             return jsonify({"success": True, "audio_url": f"/download/{output_file}?v={os.urandom(4).hex()}", "filename": output_file})
         return jsonify({"success": False, "error": "Server failed to process TTS."})
     except Exception as e:
